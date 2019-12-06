@@ -65,6 +65,9 @@ class JunitReport implements AfterAnalysisInterface
         $processed_file_list = array_fill_keys(array_keys($codebase->analyzer->getMixedCounts()), []);
         foreach ($issues as $issue_detail) {
             $key = $issue_detail["file_path"];
+            if (!array_key_exists($key, $processed_file_list) || !is_array($processed_file_list[$key])) {
+                $processed_file_list[$key] = [];
+            }
             array_push($processed_file_list[$key], $issue_detail);
         }
 
