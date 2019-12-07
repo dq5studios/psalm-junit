@@ -17,10 +17,10 @@ jobs:
       run: composer install --prefer-dist --no-progress --no-suggest
     
     - name: PHPCodeSniffer
-      uses: rtCamp/action-phpcs-inspection@v1.0.0
+      run: composer standards
     
-    - name: Psalm - Code quality tool for PHP
-      uses: mickaelandrieu/psalm-ga@v1.1
+    - name: Psalm
+      run: composer psalm
     
     # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
     # Docs: https://getcomposer.org/doc/articles/scripts.md
