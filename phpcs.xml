@@ -2,8 +2,8 @@
 <ruleset name="DQ5Studios">
     <arg value="p" />
 
-    <exclude-pattern>*/.git/*</exclude-pattern>
-    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <file>src/</file>
+    <file>tests/</file>
 
     <rule ref="PSR12" />
 
@@ -23,6 +23,7 @@
     <rule ref="Generic.PHP.DeprecatedFunctions" />
     <rule ref="Generic.PHP.ForbiddenFunctions" />
 
+    <!-- Turn blank line check back on -->
     <rule ref="Squiz.WhiteSpace.SuperfluousWhitespace">
         <properties>
             <property name="ignoreBlankLines" value="false" />

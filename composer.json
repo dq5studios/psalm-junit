@@ -25,5 +25,13 @@
         "psr-4": {
             "DQ5Studios\\PsalmJunit\\": "src/"
         }
+    },
+    "scripts": {
+        "standards": "phpcs",
+        "psalm": "psalm",
+        "all-tests": [
+            "phpcs",
+            "psalm"
+        ]
     }
 }
