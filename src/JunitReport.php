@@ -31,10 +31,8 @@ use const PSALM_VERSION;
 
 class JunitReport implements AfterAnalysisInterface
 {
-    /** @var string $file Output filename */
-    public static $file = "psalm_junit_report.xml";
-    /** @var string $path Output folder */
-    public static $path = __DIR__;
+    /** @var string $file Output filepath */
+    public static $filepath = "psalm_junit_report.xml";
     /** @var float $start_time Close enough of a start time */
     public static $start_time = 0.0;
 
@@ -113,8 +111,6 @@ class JunitReport implements AfterAnalysisInterface
 
         $output .= "</testsuites>\n";
 
-        $filepath = rtrim(self::$path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . self::$file;
-
-        file_put_contents($filepath, $output);
+        file_put_contents(self::$filepath, $output);
     }
 }

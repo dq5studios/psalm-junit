@@ -15,19 +15,21 @@ class Plugin implements PluginEntryPointInterface
      */
     public function __invoke(RegistrationInterface $psalm, ?SimpleXMLElement $config = null)
     {
-        class_exists(JunitReport::class);
-        $psalm->registerHooksFromClass(JunitReport::class);
-
+        // Set plugin options
         JunitReport::$start_time = microtime(true);
 
-        JunitReport::$path = getcwd();
+        // Set filepath via config
         if (!is_null($config)) {
-            if (!empty($config->file)) {
-                JunitReport::$file = (string) $config->file;
-            }
-            if (!empty($config->path)) {
-                JunitReport::$path = (string) $config->path;
+            if (!empty($config->filepath)) {
+                JunitReport::$filepath = (string) $config->filepath;
             }
         }
+
+        // Set in the cwd if not absolute
+        if (JunitReport::$filepath[0] !== DIRECTORY_SEPARATOR) {
+            JunitReport::$filepath = getcwd() . DIRECTORY_SEPARATOR . JunitReport::$filepath;
+        }
+
+        $psalm->registerHooksFromClass(JunitReport::class);
     }
 }

@@ -18,8 +18,6 @@
     </issueHandlers>
 
     <plugins>
-        <pluginClass class="DQ5Studios\PsalmJunit\Plugin">
-            <file>psalm_junit_report.xml</file>
-        </pluginClass>
+        <pluginClass class="DQ5Studios\PsalmJunit\Plugin" />
     </plugins>
 </psalm>

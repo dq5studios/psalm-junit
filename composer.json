@@ -1,6 +1,6 @@
 {
     "name": "dq5studios/psalm-junit",
-    "description": "Add junit report format",
+    "description": "Add junit report format to psalm",
     "type": "psalm-plugin",
     "license": "BSD-3-Clause",
     "authors": [
