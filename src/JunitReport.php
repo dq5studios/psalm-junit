@@ -61,11 +61,13 @@ class JunitReport implements AfterAnalysisInterface
         $time_taken = number_format(microtime(true) - self::$start_time, 2);
 
         // Reformat the data to group by file
+        /** @psalm-suppress InternalMethod */
+        $analyzer_list = $codebase->analyzer->getMixedCounts();
         /** @var array<string,IssueData[]> */
-        $processed_file_list = array_fill_keys(array_keys($codebase->analyzer->getMixedCounts()), []);
+        $processed_file_list = array_fill_keys(array_keys($analyzer_list), []);
         foreach ($issues as $issue_detail) {
             $key = $issue_detail["file_path"];
-            if (!array_key_exists($key, $processed_file_list) || !is_array($processed_file_list[$key])) {
+            if (!array_key_exists($key, $processed_file_list)) {
                 $processed_file_list[$key] = [];
             }
             array_push($processed_file_list[$key], $issue_detail);
