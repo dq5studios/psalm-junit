@@ -14,7 +14,8 @@
         "vimeo/psalm": "^3.7"
     },
     "require-dev": {
-        "squizlabs/php_codesniffer": "^3.5"
+        "squizlabs/php_codesniffer": "^3.5",
+        "phpunit/phpunit": "^8.5"
     },
     "extra": {
         "psalm" : {
@@ -29,9 +30,11 @@
     "scripts": {
         "standards": "phpcs",
         "psalm": "psalm",
+        "unit-test": "phpunit",
         "all-tests": [
             "phpcs",
-            "psalm"
+            "psalm",
+            "phpunit"
         ]
     }
 }

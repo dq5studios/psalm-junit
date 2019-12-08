@@ -22,7 +22,7 @@ plugin's settings in `psalm.xml` to add a `filepath` element.  All paths are rel
 </plugins>
 ```
 
-The report will not be written if another report is being requested with the --report commandline option.  To override
+The report will not be written if another report is being requested with the `--report` commandline option.  To override
 this and always generate the report, edit the plugin's settings in `psalm.xml` to add an `always` element.
 
 ```xml
