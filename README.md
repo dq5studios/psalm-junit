@@ -11,7 +11,7 @@ vendor/bin/psalm-plugin enable dq5studios/psalm-junit
 
 ## Usage
 
-The report defaults to writing `psalm_junit_report.xml` in the current working directory. To change this, edit the
+The plugin defaults to writing `psalm_junit_report.xml` in the current working directory. To change this, edit the
 plugin's settings in `psalm.xml` to add a `filepath` element.  All paths are relative to the current working directory.
 
 ```xml

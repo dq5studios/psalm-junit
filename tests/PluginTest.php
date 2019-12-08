@@ -14,11 +14,6 @@ use Psalm\Plugin\RegistrationInterface;
 class PluginTest extends TestCase
 {
     /**
-     * @var ObjectProphecy
-     */
-    private $registration;
-
-    /**
      * Test default load
      */
     public function testHasEntryPoint(): void
