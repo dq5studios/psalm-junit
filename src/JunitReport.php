@@ -71,10 +71,15 @@ class JunitReport implements AfterAnalysisInterface
             array_push($processed_file_list[$key], $issue_detail);
         }
 
+        $fh = fopen(self::$filepath, "wb");
+        if (!$fh) {
+            echo "Unable to write report to " . self::$filepath;
+            return;
+        }
         // <testsuites> parent element
-        $output = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-        $output .= "<testsuites name=\"{$suite_name}\" failures=\"{$failure_count}\" ";
-        $output .= "tests=\"{$test_count}\" errors=\"0\" time=\"{$time_taken}\">\n";
+        fwrite($fh, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+        fwrite($fh, "<testsuites name=\"{$suite_name}\" failures=\"{$failure_count}\" ");
+        fwrite($fh, "tests=\"{$test_count}\" errors=\"0\" time=\"{$time_taken}\">\n");
 
         foreach ($processed_file_list as $file_path => $issue_list) {
             $file_failure_count = 0;
@@ -103,14 +108,14 @@ class JunitReport implements AfterAnalysisInterface
             }
 
             // <testsuite> file report element
-            $output .= "\t<testsuite name=\"{$file_path}\" failures=\"{$file_failure_count}\" ";
-            $output .= "tests=\"{$file_test_count}\" errors=\"0\">\n";
-            $output .= $tc_list;
-            $output .= "\t</testsuite>\n";
+            fwrite($fh, "\t<testsuite name=\"{$file_path}\" failures=\"{$file_failure_count}\" ");
+            fwrite($fh, "tests=\"{$file_test_count}\" errors=\"0\">\n");
+            fwrite($fh, $tc_list);
+            fwrite($fh, "\t</testsuite>\n");
         }
 
-        $output .= "</testsuites>\n";
+        fwrite($fh, "</testsuites>\n");
 
-        file_put_contents(self::$filepath, $output);
+        fclose($fh);
     }
 }
