@@ -15,6 +15,12 @@ class Plugin implements PluginEntryPointInterface
      */
     public function __invoke(RegistrationInterface $psalm, ?SimpleXMLElement $config = null)
     {
+        // Check if another report is to be run
+        $opts = getopt("", ["report"]);
+        if (isset($opts["report"]) && !isset($config->always)) {
+            return;
+        }
+
         // Set plugin options
         JunitReport::$start_time = microtime(true);
 
