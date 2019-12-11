@@ -99,11 +99,12 @@ class JunitReport implements AfterAnalysisInterface
                 $tc_list .= "\t\t<testcase name=\"{$issue["type"]} at {$file_path} ";
                 $tc_list .= "({$issue["line_from"]}:{$issue["column_from"]})\" ";
                 $tc_list .= "file=\"{$file_path}\" line=\"{$issue["line_from"]}\">\n";
+                $message = htmlspecialchars($issue["message"], ENT_NOQUOTES);
                 if ($issue["severity"] == "error") {
                     $file_failure_count++;
-                    $tc_list .= "\t\t\t<failure type=\"{$issue["severity"]}\" message=\"{$issue["message"]}\" />\n";
+                    $tc_list .= "\t\t\t<failure type=\"{$issue["severity"]}\" message=\"{$message}\" />\n";
                 } else {
-                    $tc_list .= "\t\t\t<skipped />\n";
+                    $tc_list .= "\t\t\t<skipped message=\"{$message}\" />\n";
                 }
                 $tc_list .= "\t\t</testcase>\n";
             }
