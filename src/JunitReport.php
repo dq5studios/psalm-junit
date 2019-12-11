@@ -91,18 +91,19 @@ class JunitReport implements AfterAnalysisInterface
             // No errors in this file
             if (empty($issue_list)) {
                 $file_test_count = 1;
-                $tc_list = "\t\t<testcase name=\"{$file_path}\" />\n";
+                $tc_list = "\t\t<testcase name=\"{$file_path}\" file=\"{$file_path}\" />\n";
             }
 
             // Lots of errors in this file
             foreach ($issue_list as $issue) {
                 $tc_list .= "\t\t<testcase name=\"{$issue["type"]} at {$file_path} ";
-                $tc_list .= "({$issue["line_from"]}:{$issue["column_from"]})\">\n";
+                $tc_list .= "({$issue["line_from"]}:{$issue["column_from"]})\" ";
+                $tc_list .= "file=\"{$file_path}\" line=\"{$issue["line_from"]}\">\n";
                 if ($issue["severity"] == "error") {
                     $file_failure_count++;
                     $tc_list .= "\t\t\t<failure type=\"{$issue["severity"]}\" message=\"{$issue["message"]}\" />\n";
                 } else {
-                    $tc_list .= "\t\t\t<skipped message=\"{$issue["message"]}\" />\n";
+                    $tc_list .= "\t\t\t<skipped />\n";
                 }
                 $tc_list .= "\t\t</testcase>\n";
             }
