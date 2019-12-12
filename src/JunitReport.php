@@ -61,10 +61,15 @@ class JunitReport implements AfterAnalysisInterface
         // Reformat the data to group by file
         /** @psalm-suppress InternalMethod */
         $analyzer_list = $codebase->analyzer->getMixedCounts();
+        $analyzer_list = array_keys($analyzer_list);
+        $cwd = getcwd();
+        $analyzer_list = array_map(function (string $file_path) use ($cwd) {
+            return str_replace($cwd . DIRECTORY_SEPARATOR, "", $file_path);
+        }, $analyzer_list);
         /** @var array<string,IssueData[]> */
-        $processed_file_list = array_fill_keys(array_keys($analyzer_list), []);
+        $processed_file_list = array_fill_keys($analyzer_list, []);
         foreach ($issues as $issue_detail) {
-            $key = $issue_detail["file_path"];
+            $key = $issue_detail["file_name"];
             if (!array_key_exists($key, $processed_file_list)) {
                 $processed_file_list[$key] = [];
             }
@@ -99,12 +104,27 @@ class JunitReport implements AfterAnalysisInterface
                 $tc_list .= "\t\t<testcase name=\"{$issue["type"]} at {$file_path} ";
                 $tc_list .= "({$issue["line_from"]}:{$issue["column_from"]})\" ";
                 $tc_list .= "file=\"{$file_path}\" line=\"{$issue["line_from"]}\">\n";
-                $message = htmlspecialchars($issue["message"], ENT_NOQUOTES);
+                $message = htmlspecialchars($issue["message"], ENT_XML1 | ENT_QUOTES);
+                $snippet = "";
+                $snippet_lines = explode("\n", $issue["snippet"]);
+                $from = (int) $issue["line_from"];
+                foreach ($snippet_lines as $line) {
+                    $snippet .= (string) $from . ":" . htmlspecialchars($line, ENT_XML1 | ENT_QUOTES) . "\n";
+                    $from++;
+                }
                 if ($issue["severity"] == "error") {
                     $file_failure_count++;
-                    $tc_list .= "\t\t\t<failure type=\"{$issue["severity"]}\" message=\"{$message}\" />\n";
+                    $tc_list .= "\t\t\t<failure type=\"{$issue["severity"]}\" message=\"{$message}\">\n";
+                    $tc_list .= "{$issue["severity"]}: {$issue["type"]} - ";
+                    $tc_list .= "{$file_path}:{$issue["line_from"]}:{$issue["column_from"]} - {$message}\n";
+                    $tc_list .= $snippet;
+                    $tc_list .= "\t\t\t</failure>\n";
                 } else {
-                    $tc_list .= "\t\t\t<skipped message=\"{$message}\" />\n";
+                    $tc_list .= "\t\t\t<skipped message=\"{$message}\">\n";
+                    $tc_list .= "{$issue["severity"]}: {$issue["type"]} - ";
+                    $tc_list .= "{$file_path}:{$issue["line_from"]}:{$issue["column_from"]} - {$message}\n";
+                    $tc_list .= $snippet;
+                    $tc_list .= "\t\t\t</skipped>\n";
                 }
                 $tc_list .= "\t\t</testcase>\n";
             }
