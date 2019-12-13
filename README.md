@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.com/dq5studios/psalm-junit.svg?branch=master)](https://travis-ci.com/dq5studios/psalm-junit)
+[![codecov](https://codecov.io/gh/dq5studios/psalm-junit/branch/master/graph/badge.svg)](https://codecov.io/gh/dq5studios/psalm-junit)
+
 # psalm-junit
 
 A Junit report plugin for [Psalm](https://github.com/vimeo/psalm) (requires Psalm v3).
