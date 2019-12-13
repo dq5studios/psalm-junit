@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DQ5Studios\PsalmJunit;
 
+use DOMDocument;
 use Psalm\Codebase;
 use Psalm\Plugin\Hook\AfterAnalysisInterface;
 use Psalm\SourceControl\SourceControlInfo;
@@ -76,36 +77,45 @@ class JunitReport implements AfterAnalysisInterface
             array_push($processed_file_list[$key], $issue_detail);
         }
 
-        $fh = fopen(self::$filepath, "wb");
-        if (!$fh) {
-            echo "Unable to write report to " . self::$filepath;
-            return;
-        }
         // <testsuites> parent element
-        fwrite($fh, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-        fwrite($fh, "<testsuites name=\"{$suite_name}\" failures=\"{$failure_count}\" ");
-        fwrite($fh, "tests=\"{$test_count}\" errors=\"0\" time=\"{$time_taken}\">\n");
+        $dom = new DOMDocument("1.0", "UTF-8");
+        $dom->formatOutput = true;
+        $testsuites = $dom->createElement("testsuites");
+        $testsuites->setAttribute("name", $suite_name);
+        $testsuites->setAttribute("failures", (string) $failure_count);
+        $testsuites->setAttribute("tests", (string) $test_count);
+        $testsuites->setAttribute("errors", "0");
+        $testsuites->setAttribute("time", $time_taken);
+        $dom->appendChild($testsuites);
 
         foreach ($processed_file_list as $file_path => $issue_list) {
             $file_failure_count = 0;
             $file_test_count = count($issue_list);
-            $tc_list = "";
 
             // Build <testcase> elements
+            $testsuite = $dom->createElement("testsuite");
+            $testsuite->setAttribute("name", $file_path);
 
             // No errors in this file
             if (empty($issue_list)) {
                 $file_test_count = 1;
-                $tc_list = "\t\t<testcase name=\"{$file_path}\" file=\"{$file_path}\" />\n";
+                $testcase = $dom->createElement("testcase");
+                $testcase->setAttribute("name", $file_path);
+                $testcase->setAttribute("file", $file_path);
+                $testsuite->appendChild($testcase);
             }
 
             // Lots of errors in this file
             foreach ($issue_list as $issue) {
-                $tc_list .= "\t\t<testcase name=\"{$issue["type"]} at {$file_path} ";
-                $tc_list .= "({$issue["line_from"]}:{$issue["column_from"]})\" ";
-                $tc_list .= "file=\"{$file_path}\" line=\"{$issue["line_from"]}\">\n";
+                $testcase = $dom->createElement("testcase");
+                $name = "{$issue["type"]} at {$file_path} ({$issue["line_from"]}:{$issue["column_from"]})";
+                $testcase->setAttribute("name", $name);
+                $testcase->setAttribute("file", $file_path);
+                $testcase->setAttribute("line", (string) $issue["line_from"]);
+                $testsuite->appendChild($testcase);
                 $message = htmlspecialchars($issue["message"], ENT_XML1 | ENT_QUOTES);
-                $snippet = "";
+                $snippet = "{$issue["severity"]}: {$issue["type"]} - ";
+                $snippet .= "{$file_path}:{$issue["line_from"]}:{$issue["column_from"]} - {$message}\n";
                 $snippet_lines = explode("\n", $issue["snippet"]);
                 $from = (int) $issue["line_from"];
                 foreach ($snippet_lines as $line) {
@@ -114,30 +124,24 @@ class JunitReport implements AfterAnalysisInterface
                 }
                 if ($issue["severity"] == "error") {
                     $file_failure_count++;
-                    $tc_list .= "\t\t\t<failure type=\"{$issue["severity"]}\" message=\"{$message}\">\n";
-                    $tc_list .= "{$issue["severity"]}: {$issue["type"]} - ";
-                    $tc_list .= "{$file_path}:{$issue["line_from"]}:{$issue["column_from"]} - {$message}\n";
-                    $tc_list .= $snippet;
-                    $tc_list .= "\t\t\t</failure>\n";
+                    $failure = $dom->createElement("failure", $snippet);
+                    $failure->setAttribute("type", $issue["severity"]);
+                    $failure->setAttribute("message", $message);
+                    $testcase->appendChild($failure);
                 } else {
-                    $tc_list .= "\t\t\t<skipped message=\"{$message}\">\n";
-                    $tc_list .= "{$issue["severity"]}: {$issue["type"]} - ";
-                    $tc_list .= "{$file_path}:{$issue["line_from"]}:{$issue["column_from"]} - {$message}\n";
-                    $tc_list .= $snippet;
-                    $tc_list .= "\t\t\t</skipped>\n";
+                    $skipped = $dom->createElement("skipped", $snippet);
+                    $skipped->setAttribute("message", $message);
+                    $testcase->appendChild($skipped);
                 }
-                $tc_list .= "\t\t</testcase>\n";
             }
 
             // <testsuite> file report element
-            fwrite($fh, "\t<testsuite name=\"{$file_path}\" failures=\"{$file_failure_count}\" ");
-            fwrite($fh, "tests=\"{$file_test_count}\" errors=\"0\">\n");
-            fwrite($fh, $tc_list);
-            fwrite($fh, "\t</testsuite>\n");
+            $testsuite->setAttribute("failures", (string) $file_failure_count);
+            $testsuite->setAttribute("tests", (string) $file_test_count);
+            $testsuite->setAttribute("errors", "0");
+            $testsuites->appendChild($testsuite);
         }
 
-        fwrite($fh, "</testsuites>\n");
-
-        fclose($fh);
+        file_put_contents(self::$filepath, $dom->saveXML());
     }
 }
