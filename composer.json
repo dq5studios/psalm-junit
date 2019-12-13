@@ -30,8 +30,8 @@
     },
     "scripts": {
         "standards": "phpcs",
-        "analyze": "psalm",
-        "unit-test": "phpunit",
+        "analyze": "psalm --shepherd",
+        "unit-test": "phpunit --coverage-clover=coverage.xml",
         "all-tests": [
             "phpcs",
             "psalm",
