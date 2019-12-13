@@ -20,7 +20,7 @@ jobs:
       run: composer standards
 
     - name: Psalm
-      run: composer psalm
+      run: composer analyze
 
     - name: PHPUnit
       run: composer unit-test
