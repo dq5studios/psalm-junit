@@ -113,6 +113,7 @@ class JunitReport implements AfterAnalysisInterface
         foreach ($issue_suite as $file_path => $issue_list) {
             $file_failure_count = 0;
             $file_test_count = count($issue_list);
+            $classname = str_replace(DIRECTORY_SEPARATOR, ".", $file_path);
 
             // Build <testcase> elements
             $testsuite = $dom->createElement("testsuite");
@@ -124,6 +125,7 @@ class JunitReport implements AfterAnalysisInterface
                 $testcase = $dom->createElement("testcase");
                 $testcase->setAttribute("name", $file_path);
                 $testcase->setAttribute("file", $file_path);
+                $testcase->setAttribute("classname", $classname);
                 $testsuite->appendChild($testcase);
             }
 
@@ -133,6 +135,7 @@ class JunitReport implements AfterAnalysisInterface
                 $name = "{$issue["type"]} at {$file_path} ({$issue["line_from"]}:{$issue["column_from"]})";
                 $testcase->setAttribute("name", $name);
                 $testcase->setAttribute("file", $file_path);
+                $testcase->setAttribute("classname", $classname);
                 $testcase->setAttribute("line", (string) $issue["line_from"]);
                 $testsuite->appendChild($testcase);
                 $message = htmlspecialchars($issue["message"], ENT_XML1 | ENT_QUOTES);
