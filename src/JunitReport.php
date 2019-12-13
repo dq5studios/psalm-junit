@@ -77,6 +77,28 @@ class JunitReport implements AfterAnalysisInterface
             array_push($processed_file_list[$key], $issue_detail);
         }
 
+        $xml = self::createXml($processed_file_list, $suite_name, $test_count, $failure_count, $time_taken);
+        file_put_contents(self::$filepath, $xml);
+    }
+
+    /**
+     * Create an XML string out of the data
+     *
+     * @param array<string,IssueData[]> $issue_suite
+     * @param string                    $suite_name
+     * @param int                       $test_count
+     * @param int                       $failure_count
+     * @param string                    $time_taken
+     *
+     * @return string
+     */
+    public static function createXml(
+        array $issue_suite,
+        string $suite_name,
+        int $test_count,
+        int $failure_count,
+        string $time_taken
+    ): string {
         // <testsuites> parent element
         $dom = new DOMDocument("1.0", "UTF-8");
         $dom->formatOutput = true;
@@ -88,7 +110,7 @@ class JunitReport implements AfterAnalysisInterface
         $testsuites->setAttribute("time", $time_taken);
         $dom->appendChild($testsuites);
 
-        foreach ($processed_file_list as $file_path => $issue_list) {
+        foreach ($issue_suite as $file_path => $issue_list) {
             $file_failure_count = 0;
             $file_test_count = count($issue_list);
 
@@ -142,6 +164,6 @@ class JunitReport implements AfterAnalysisInterface
             $testsuites->appendChild($testsuite);
         }
 
-        file_put_contents(self::$filepath, $dom->saveXML());
+        return $dom->saveXML();
     }
 }

@@ -29,7 +29,7 @@
     },
     "scripts": {
         "standards": "phpcs",
-        "psalm": "psalm",
+        "analyze": "psalm",
         "unit-test": "phpunit",
         "all-tests": [
             "phpcs",
