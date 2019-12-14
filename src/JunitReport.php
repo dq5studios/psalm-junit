@@ -150,7 +150,7 @@ class JunitReport implements AfterAnalysisInterface
 
         // Lots of errors in this file
         foreach ($issue_list as $issue) {
-            $testcase = JunitReport::makeTestcase($issue, $dom, $failure_count, $file_path, $classname);
+            $testcase = JunitReport::makeTestcase($issue, $dom, $failure_count, $file_path);
             $testsuite->appendChild($testcase);
         }
 
@@ -176,15 +176,12 @@ class JunitReport implements AfterAnalysisInterface
         array $issue,
         DOMDocument $dom,
         int &$failures,
-        string $file_path,
-        string $classname
+        string $file_path
     ): DOMElement {
         $testcase = $dom->createElement("testcase");
         $name = "{$issue["type"]} at {$file_path} ({$issue["line_from"]}:{$issue["column_from"]})";
         $testcase->setAttribute("name", $name);
-        $testcase->setAttribute("file", $file_path);
-        $testcase->setAttribute("classname", $classname);
-        $testcase->setAttribute("line", (string) $issue["line_from"]);
+        $testcase->setAttribute("classname", $file_path);
         $message = htmlspecialchars($issue["message"], ENT_XML1 | ENT_QUOTES);
         $snippet = "{$issue["severity"]}: {$issue["type"]} - ";
         $snippet .= "{$file_path}:{$issue["line_from"]}:{$issue["column_from"]} - {$message}\n";
@@ -203,7 +200,6 @@ class JunitReport implements AfterAnalysisInterface
             $testcase->appendChild($failure);
         } else {
             $skipped = $testcase->ownerDocument->createElement("skipped", $snippet);
-            $skipped->setAttribute("message", $message);
             $testcase->appendChild($skipped);
         }
 

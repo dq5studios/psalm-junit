@@ -6,10 +6,9 @@ namespace DQ5Studios\PsalmJunit\Tests;
 
 use DQ5Studios\PsalmJunit\JunitReport;
 use DQ5Studios\PsalmJunit\Plugin;
-use SimpleXMLElement;
 use PHPUnit\Framework\TestCase;
-use Prophecy\Prophecy\ObjectProphecy;
 use Psalm\Plugin\RegistrationInterface;
+use SimpleXMLElement;
 
 class PluginTest extends TestCase
 {
