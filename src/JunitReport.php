@@ -37,6 +37,10 @@ class JunitReport implements AfterAnalysisInterface
     public static $filepath = "psalm_junit_report.xml";
     /** @var float $start_time Close enough of a start time */
     public static $start_time = 0.0;
+    /** @var int $test_count Total count of tests */
+    public static $test_count = 0;
+    /** @var int $failure_count Total failed tests */
+    public static $failure_count = 0;
 
     /**
      * {@inheritDoc}
@@ -47,19 +51,6 @@ class JunitReport implements AfterAnalysisInterface
         array $build_info,
         SourceControlInfo $source_control_info = null
     ) {
-        // Global totals
-        $test_count = 0;
-        $failure_count = 0;
-        if (!empty($issues)) {
-            $severity_list = array_count_values(array_column($issues, "severity"));
-            $test_count = count($issues);
-            if (isset($severity_list["error"])) {
-                $failure_count = $severity_list["error"];
-            }
-        }
-        $suite_name = "Psalm " . PSALM_VERSION;
-        $time_taken = number_format(microtime(true) - self::$start_time, 2);
-
         // Reformat the data to group by file
         /** @psalm-suppress InternalMethod */
         $analyzer_list = $codebase->analyzer->getMixedCounts();
@@ -78,7 +69,10 @@ class JunitReport implements AfterAnalysisInterface
             array_push($processed_file_list[$key], $issue_detail);
         }
 
-        $xml = self::createXml($processed_file_list, $suite_name, $test_count, $failure_count, $time_taken);
+        $suite_name = "Psalm " . PSALM_VERSION;
+        $time_taken = number_format(microtime(true) - self::$start_time, 2);
+
+        $xml = self::createXml($processed_file_list, $suite_name, $time_taken);
         file_put_contents(self::$filepath, $xml);
     }
 
@@ -87,8 +81,6 @@ class JunitReport implements AfterAnalysisInterface
      *
      * @param array<string,IssueData[]> $issue_suite
      * @param string                    $suite_name
-     * @param int                       $test_count
-     * @param int                       $failure_count
      * @param string                    $time_taken
      *
      * @return string
@@ -96,25 +88,26 @@ class JunitReport implements AfterAnalysisInterface
     public static function createXml(
         array $issue_suite,
         string $suite_name,
-        int $test_count,
-        int $failure_count,
         string $time_taken
     ): string {
+        // Initialize counters
+        self::$test_count = 0;
+        self::$failure_count = 0;
         // <testsuites> parent element
         $dom = new DOMDocument("1.0", "UTF-8");
         $dom->formatOutput = true;
         $testsuites = $dom->createElement("testsuites");
         $testsuites->setAttribute("name", $suite_name);
-        $testsuites->setAttribute("failures", (string) $failure_count);
-        $testsuites->setAttribute("tests", (string) $test_count);
-        $testsuites->setAttribute("errors", "0");
         $testsuites->setAttribute("time", $time_taken);
         $dom->appendChild($testsuites);
 
         foreach ($issue_suite as $file_path => $issue_list) {
-            $testsuite = JunitReport::makeTestsuite($issue_list, $dom, $file_path);
+            $testsuite = self::makeTestsuite($issue_list, $dom, $file_path);
             $testsuites->appendChild($testsuite);
         }
+        $testsuites->setAttribute("failures", (string) self::$failure_count);
+        $testsuites->setAttribute("tests", (string) self::$test_count);
+        $testsuites->setAttribute("errors", "0");
 
         return $dom->saveXML();
     }
@@ -143,14 +136,13 @@ class JunitReport implements AfterAnalysisInterface
             $file_test_count = 1;
             $testcase = $testsuite->ownerDocument->createElement("testcase");
             $testcase->setAttribute("name", $file_path);
-            $testcase->setAttribute("file", $file_path);
             $testcase->setAttribute("classname", $classname);
             $testsuite->appendChild($testcase);
         }
 
         // Lots of errors in this file
         foreach ($issue_list as $issue) {
-            $testcase = JunitReport::makeTestcase($issue, $dom, $failure_count, $file_path);
+            $testcase = self::makeTestcase($issue, $dom, $failure_count, $file_path);
             $testsuite->appendChild($testcase);
         }
 
@@ -158,6 +150,8 @@ class JunitReport implements AfterAnalysisInterface
         $testsuite->setAttribute("failures", (string) $failure_count);
         $testsuite->setAttribute("tests", (string) $file_test_count);
         $testsuite->setAttribute("errors", "0");
+        self::$test_count += $file_test_count;
+        self::$failure_count += $failure_count;
         return $testsuite;
     }
 
@@ -168,7 +162,6 @@ class JunitReport implements AfterAnalysisInterface
      * @param DOMDocument $dom       Source DOM
      * @param int         $failures  Number of failures
      * @param string      $file_path File being processed
-     * @param string      $classname Classname label
      *
      * @return DOMElement Testcase element
      */
@@ -178,17 +171,18 @@ class JunitReport implements AfterAnalysisInterface
         int &$failures,
         string $file_path
     ): DOMElement {
+        $classname = pathinfo(str_replace(DIRECTORY_SEPARATOR, ".", $file_path), PATHINFO_FILENAME);
         $testcase = $dom->createElement("testcase");
         $name = "{$issue["type"]} at {$file_path} ({$issue["line_from"]}:{$issue["column_from"]})";
         $testcase->setAttribute("name", $name);
-        $testcase->setAttribute("classname", $file_path);
-        $message = htmlspecialchars($issue["message"], ENT_XML1 | ENT_QUOTES);
+        $testcase->setAttribute("classname", $classname);
+        $message = $issue["message"];
         $snippet = "{$issue["severity"]}: {$issue["type"]} - ";
         $snippet .= "{$file_path}:{$issue["line_from"]}:{$issue["column_from"]} - {$message}\n";
         $snippet_lines = explode("\n", $issue["snippet"]);
         $from = (int) $issue["line_from"];
         foreach ($snippet_lines as $line) {
-            $snippet .= (string) $from . ":" . htmlspecialchars($line, ENT_XML1 | ENT_QUOTES) . "\n";
+            $snippet .= (string) $from . ":" . $line . "\n";
             $from++;
         }
 
