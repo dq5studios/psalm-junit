@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace DQ5Studios\PsalmJunit;
 
 use DOMDocument;
+use DOMElement;
 use Psalm\Codebase;
 use Psalm\Plugin\Hook\AfterAnalysisInterface;
 use Psalm\SourceControl\SourceControlInfo;
@@ -111,62 +112,101 @@ class JunitReport implements AfterAnalysisInterface
         $dom->appendChild($testsuites);
 
         foreach ($issue_suite as $file_path => $issue_list) {
-            $file_failure_count = 0;
-            $file_test_count = count($issue_list);
-            $classname = str_replace(DIRECTORY_SEPARATOR, ".", $file_path);
-
-            // Build <testcase> elements
-            $testsuite = $dom->createElement("testsuite");
-            $testsuite->setAttribute("name", $file_path);
-
-            // No errors in this file
-            if (empty($issue_list)) {
-                $file_test_count = 1;
-                $testcase = $dom->createElement("testcase");
-                $testcase->setAttribute("name", $file_path);
-                $testcase->setAttribute("file", $file_path);
-                $testcase->setAttribute("classname", $classname);
-                $testsuite->appendChild($testcase);
-            }
-
-            // Lots of errors in this file
-            foreach ($issue_list as $issue) {
-                $testcase = $dom->createElement("testcase");
-                $name = "{$issue["type"]} at {$file_path} ({$issue["line_from"]}:{$issue["column_from"]})";
-                $testcase->setAttribute("name", $name);
-                $testcase->setAttribute("file", $file_path);
-                $testcase->setAttribute("classname", $classname);
-                $testcase->setAttribute("line", (string) $issue["line_from"]);
-                $testsuite->appendChild($testcase);
-                $message = htmlspecialchars($issue["message"], ENT_XML1 | ENT_QUOTES);
-                $snippet = "{$issue["severity"]}: {$issue["type"]} - ";
-                $snippet .= "{$file_path}:{$issue["line_from"]}:{$issue["column_from"]} - {$message}\n";
-                $snippet_lines = explode("\n", $issue["snippet"]);
-                $from = (int) $issue["line_from"];
-                foreach ($snippet_lines as $line) {
-                    $snippet .= (string) $from . ":" . htmlspecialchars($line, ENT_XML1 | ENT_QUOTES) . "\n";
-                    $from++;
-                }
-                if ($issue["severity"] == "error") {
-                    $file_failure_count++;
-                    $failure = $dom->createElement("failure", $snippet);
-                    $failure->setAttribute("type", $issue["severity"]);
-                    $failure->setAttribute("message", $message);
-                    $testcase->appendChild($failure);
-                } else {
-                    $skipped = $dom->createElement("skipped", $snippet);
-                    $skipped->setAttribute("message", $message);
-                    $testcase->appendChild($skipped);
-                }
-            }
-
-            // <testsuite> file report element
-            $testsuite->setAttribute("failures", (string) $file_failure_count);
-            $testsuite->setAttribute("tests", (string) $file_test_count);
-            $testsuite->setAttribute("errors", "0");
+            $testsuite = JunitReport::makeTestsuite($issue_list, $dom, $file_path);
             $testsuites->appendChild($testsuite);
         }
 
         return $dom->saveXML();
+    }
+
+    /**
+     * Create testsuite element
+     *
+     * @param IssueData[] $issue_list All issues for this file
+     * @param DOMDocument $dom        Source DOM
+     * @param string      $file_path  File being processed
+     *
+     * @return DOMElement Testsuite element
+     */
+    public static function makeTestsuite(array $issue_list, DOMDocument $dom, string $file_path): DOMElement
+    {
+        $failure_count = 0;
+        $file_test_count = count($issue_list);
+        $classname = pathinfo(str_replace(DIRECTORY_SEPARATOR, ".", $file_path), PATHINFO_FILENAME);
+
+        // Build <testcase> elements
+        $testsuite = $dom->createElement("testsuite");
+        $testsuite->setAttribute("name", $file_path);
+
+        // No errors in this file
+        if (empty($issue_list)) {
+            $file_test_count = 1;
+            $testcase = $testsuite->ownerDocument->createElement("testcase");
+            $testcase->setAttribute("name", $file_path);
+            $testcase->setAttribute("file", $file_path);
+            $testcase->setAttribute("classname", $classname);
+            $testsuite->appendChild($testcase);
+        }
+
+        // Lots of errors in this file
+        foreach ($issue_list as $issue) {
+            $testcase = JunitReport::makeTestcase($issue, $dom, $failure_count, $file_path, $classname);
+            $testsuite->appendChild($testcase);
+        }
+
+        // <testsuite> file report element
+        $testsuite->setAttribute("failures", (string) $failure_count);
+        $testsuite->setAttribute("tests", (string) $file_test_count);
+        $testsuite->setAttribute("errors", "0");
+        return $testsuite;
+    }
+
+    /**
+     * Create testcase element
+     *
+     * @param IssueData   $issue     Issue info
+     * @param DOMDocument $dom       Source DOM
+     * @param int         $failures  Number of failures
+     * @param string      $file_path File being processed
+     * @param string      $classname Classname label
+     *
+     * @return DOMElement Testcase element
+     */
+    public static function makeTestcase(
+        array $issue,
+        DOMDocument $dom,
+        int &$failures,
+        string $file_path,
+        string $classname
+    ): DOMElement {
+        $testcase = $dom->createElement("testcase");
+        $name = "{$issue["type"]} at {$file_path} ({$issue["line_from"]}:{$issue["column_from"]})";
+        $testcase->setAttribute("name", $name);
+        $testcase->setAttribute("file", $file_path);
+        $testcase->setAttribute("classname", $classname);
+        $testcase->setAttribute("line", (string) $issue["line_from"]);
+        $message = htmlspecialchars($issue["message"], ENT_XML1 | ENT_QUOTES);
+        $snippet = "{$issue["severity"]}: {$issue["type"]} - ";
+        $snippet .= "{$file_path}:{$issue["line_from"]}:{$issue["column_from"]} - {$message}\n";
+        $snippet_lines = explode("\n", $issue["snippet"]);
+        $from = (int) $issue["line_from"];
+        foreach ($snippet_lines as $line) {
+            $snippet .= (string) $from . ":" . htmlspecialchars($line, ENT_XML1 | ENT_QUOTES) . "\n";
+            $from++;
+        }
+
+        if ($issue["severity"] == "error") {
+            $failures++;
+            $failure = $testcase->ownerDocument->createElement("failure", $snippet);
+            $failure->setAttribute("type", $issue["severity"]);
+            $failure->setAttribute("message", $message);
+            $testcase->appendChild($failure);
+        } else {
+            $skipped = $testcase->ownerDocument->createElement("skipped", $snippet);
+            $skipped->setAttribute("message", $message);
+            $testcase->appendChild($skipped);
+        }
+
+        return $testcase;
     }
 }
