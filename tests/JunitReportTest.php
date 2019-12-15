@@ -10,6 +10,11 @@ use DOMDocument;
 use DOMNamedNodeMap;
 use DOMNode;
 use Generator;
+use org\bovigo\vfs\vfsStream;
+use org\bovigo\vfs\vfsStreamFile;
+use Prophecy\Promise\ReturnPromise;
+use Psalm\Codebase;
+use Psalm\Internal\Codebase\Analyzer;
 
 /**
  * @psalm-type  IssueData = array{
@@ -62,10 +67,10 @@ class JunitReportTest extends TestCase
                     "line_from" => 10,
                     "line_to" => 10,
                     "type" => "UndefinedVariable",
-                    "message" => "Can not find variable",
+                    "message" => "Can not find &amp;variable",
                     "file_name" => "file1.php",
                     "file_path" => "file1.php",
-                    "snippet" => "\$i++",
+                    "snippet" => "\$i++&amp;",
                     "from" => 0,
                     "to" => 3,
                     "snippet_from" => 10,
@@ -97,8 +102,8 @@ class JunitReportTest extends TestCase
                     "line_to" => 10,
                     "type" => "UndefinedVariable",
                     "message" => "Can not find variable ->",
-                    "file_name" => "file1.php",
-                    "file_path" => "file1.php",
+                    "file_name" => "file2.php",
+                    "file_path" => "file2.php",
                     "snippet" => "\$i->i++",
                     "from" => 0,
                     "to" => 3,
@@ -113,8 +118,8 @@ class JunitReportTest extends TestCase
                     "line_to" => 10,
                     "type" => "UndefinedVariable",
                     "message" => "Can not find \"variable\"",
-                    "file_name" => "file1.php",
-                    "file_path" => "file1.php",
+                    "file_name" => "file2.php",
+                    "file_path" => "file2.php",
                     "snippet" => "\$i[\"i\"]++",
                     "from" => 0,
                     "to" => 3,
@@ -129,8 +134,8 @@ class JunitReportTest extends TestCase
                     "line_to" => 10,
                     "type" => "UndefinedVariable",
                     "message" => "Can not find 'variable'",
-                    "file_name" => "file1.php",
-                    "file_path" => "file1.php",
+                    "file_name" => "file2.php",
+                    "file_path" => "file2.php",
                     "snippet" => "\$i['i']++",
                     "from" => 0,
                     "to" => 3,
@@ -141,7 +146,7 @@ class JunitReportTest extends TestCase
                 ]
             ]
         ];
-        yield "2 files 4 issues 1 supressed with escaping" => [
+        yield "2 files 4 issues 1 supressed needs escaping" => [
             $issue_list, "Test Case #3", "15.5", ["tests" => 5, "failures" => 4, "children" => 2]
         ];
     }
@@ -159,6 +164,68 @@ class JunitReportTest extends TestCase
     public function testXmlGeneration(array $issue_list, string $suite_name, string $time_taken, array $expected): void
     {
         $xml = JunitReport::createXml($issue_list, $suite_name, $time_taken);
+        $this->xmlFileAsserts($xml, $expected);
+    }
+
+    /**
+     * Test generating report via psalm input
+     *
+     * @dataProvider generateTestCases
+     *
+     * @param array<string,IssueData[]> $issue_list
+     * @param string                    $suite_name
+     * @param string                    $time_taken
+     * @param array<string,int>         $expected
+     */
+    public function testPsalmInput(array $issue_list, string $suite_name, string $time_taken, array $expected): void
+    {
+        // Setup vfs
+        $filename = uniqid("junit", true) . "xml";
+        $vfs = vfsStream::setup(getcwd());
+        JunitReport::$filepath = $vfs->url() . DIRECTORY_SEPARATOR . $filename;
+
+        // Setup some variables
+        if (!defined("PSALM_VERSION")) {
+            define("PSALM_VERSION", "1.2.3");
+        }
+        JunitReport::$start_time = microtime(true);
+
+        // Mock up the typed parameter
+        $prophecy = $this->prophesize(Codebase::class);
+        /** @var Codebase */
+        $codebase = $prophecy->reveal();
+        $other_prophecy = $this->prophesize(Analyzer::class);
+        $other_prophecy->getMixedCounts()->will(new ReturnPromise([$issue_list]));
+        /** @var Analyzer */
+        $analyzer = $other_prophecy->reveal();
+        $codebase->analyzer = $analyzer;
+
+        // Reformat input
+        /** @var array<int, array{severity: string, line_from: int, line_to: int, type: string, message: string,
+          * file_name: string, file_path: string, snippet: string, from: int, to: int,
+          * snippet_from: int, snippet_to: int, column_from: int, column_to: int, selected_text: string}>
+          */
+        $issue_list = array_merge(...array_values($issue_list));
+
+        // Go
+        JunitReport::afterAnalysis($codebase, $issue_list, [], null);
+
+        // Read the file output
+        $this->assertTrue($vfs->hasChild($filename));
+        $test = $vfs->getChild($filename);
+        assert($test instanceof vfsStreamFile);
+        $xml = $test->getContent();
+        $this->xmlFileAsserts($xml, $expected);
+    }
+
+    /**
+     * Asserts on processing the XML that both entry points need
+     *
+     * @param array<string,IssueData[]> $issue_list
+     * @param array<string,int>         $expected
+     */
+    public function xmlFileAsserts(string $xml, array $expected): void
+    {
         $dom = new DOMDocument("1.0", "UTF-8");
         $dom->preserveWhiteSpace = false;
         $dom->loadXML($xml);

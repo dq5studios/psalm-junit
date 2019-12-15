@@ -16,7 +16,8 @@
     "require-dev": {
         "squizlabs/php_codesniffer": "^3.5",
         "phpunit/phpunit": "^8.5",
-        "ocramius/package-versions": "~1.4.0"
+        "ocramius/package-versions": "~1.4.0",
+        "mikey179/vfsstream": "^1.6"
     },
     "extra": {
         "psalm" : {
@@ -25,7 +26,12 @@
     },
     "autoload": {
         "psr-4": {
-            "DQ5Studios\\PsalmJunit\\": "src/"
+            "DQ5Studios\\PsalmJunit\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "DQ5Studios\\PsalmJunit\\Tests\\": "tests"
         }
     },
     "scripts": {
@@ -34,8 +40,8 @@
         "unit-test": "phpunit --coverage-clover=coverage.xml",
         "all-tests": [
             "phpcs",
-            "psalm",
-            "phpunit"
+            "psalm --threads=2",
+            "phpunit --coverage-text --testdox"
         ]
     }
 }
