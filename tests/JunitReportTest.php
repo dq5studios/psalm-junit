@@ -205,7 +205,7 @@ class JunitReportTest extends TestCase
           * file_name: string, file_path: string, snippet: string, from: int, to: int,
           * snippet_from: int, snippet_to: int, column_from: int, column_to: int, selected_text: string}>
           */
-        $issue_list = array_merge(...array_values($issue_list));
+        $issue_list = array_merge(...(array_values($issue_list) ?? []));
 
         // Go
         JunitReport::afterAnalysis($codebase, $issue_list, [], null);
