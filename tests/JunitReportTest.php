@@ -203,7 +203,7 @@ class JunitReportTest extends TestCase
         // Reformat input
         $values = array_values($issue_list);
         if (empty($values)) {
-            $values = [];
+            $values = [[]];
         }
         /** @var array<int, array{severity: string, line_from: int, line_to: int, type: string, message: string,
           * file_name: string, file_path: string, snippet: string, from: int, to: int,
