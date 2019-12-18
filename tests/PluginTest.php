@@ -49,7 +49,7 @@ class PluginTest extends TestCase
     public function testAcceptsShowInfoConfigOption(): void
     {
         $registration = $this->prophesize(RegistrationInterface::class);
-        $config = new SimpleXMLElement("<pluginClass><show_info>false</show_info></pluginClass>");
+        $config = new SimpleXMLElement("<pluginClass><showInfo>false</showInfo></pluginClass>");
         $plugin = new Plugin();
         /** @var RegistrationInterface */
         $reg_interface = $registration->reveal();
@@ -63,7 +63,7 @@ class PluginTest extends TestCase
     public function testAcceptsShowSnippetConfigOption(): void
     {
         $registration = $this->prophesize(RegistrationInterface::class);
-        $config = new SimpleXMLElement("<pluginClass><show_snippet>false</show_snippet></pluginClass>");
+        $config = new SimpleXMLElement("<pluginClass><showSnippet>false</showSnippet></pluginClass>");
         $plugin = new Plugin();
         /** @var RegistrationInterface */
         $reg_interface = $registration->reveal();

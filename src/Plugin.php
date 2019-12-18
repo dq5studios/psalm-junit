@@ -32,11 +32,11 @@ class Plugin implements PluginEntryPointInterface
             if (!empty($config->filepath)) {
                 JunitReport::$filepath = (string) $config->filepath;
             }
-            if (!empty($config->show_info)) {
-                JunitReport::$show_info = filter_var($config->show_info, FILTER_VALIDATE_BOOLEAN);
+            if (!empty($config->showInfo)) {
+                JunitReport::$show_info = filter_var($config->showInfo, FILTER_VALIDATE_BOOLEAN);
             }
-            if (!empty($config->show_snippet)) {
-                JunitReport::$show_snippet = filter_var($config->show_snippet, FILTER_VALIDATE_BOOLEAN);
+            if (!empty($config->showSnippet)) {
+                JunitReport::$show_snippet = filter_var($config->showSnippet, FILTER_VALIDATE_BOOLEAN);
             }
         }
 
