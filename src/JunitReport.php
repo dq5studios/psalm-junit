@@ -35,6 +35,10 @@ class JunitReport implements AfterAnalysisInterface
 {
     /** @var string $file Output filepath */
     public static $filepath = "psalm_junit_report.xml";
+    /** @var bool $show_info Include info level issues */
+    public static $show_info = true;
+    /** @var bool $show_info Include snippets */
+    public static $show_snippet = true;
     /** @var float $start_time Close enough of a start time */
     public static $start_time = 0.0;
     /** @var int $test_count Total count of tests */
@@ -146,6 +150,10 @@ class JunitReport implements AfterAnalysisInterface
             $testsuite->appendChild($testcase);
         }
 
+        if (!self::$show_info && !empty($issue_list)) {
+            $file_test_count = $failure_count;
+        }
+
         // <testsuite> file report element
         $testsuite->setAttribute("failures", (string) $failure_count);
         $testsuite->setAttribute("tests", (string) $file_test_count);
@@ -179,11 +187,13 @@ class JunitReport implements AfterAnalysisInterface
         $message = $issue["message"];
         $snippet = "{$issue["severity"]}: {$issue["type"]} - ";
         $snippet .= "{$file_path}:{$issue["line_from"]}:{$issue["column_from"]} - {$message}\n";
-        $snippet_lines = explode("\n", $issue["snippet"]);
-        $from = (int) $issue["line_from"];
-        foreach ($snippet_lines as $line) {
-            $snippet .= (string) $from . ":" . $line . "\n";
-            $from++;
+        if (self::$show_snippet) {
+            $snippet_lines = explode("\n", $issue["snippet"]);
+            $from = (int) $issue["line_from"];
+            foreach ($snippet_lines as $line) {
+                $snippet .= (string) $from . ":" . htmlspecialchars($line, ENT_XML1 | ENT_QUOTES) . "\n";
+                $from++;
+            }
         }
 
         if ($issue["severity"] == "error") {
@@ -192,7 +202,7 @@ class JunitReport implements AfterAnalysisInterface
             $failure->setAttribute("type", $issue["severity"]);
             $failure->setAttribute("message", $message);
             $testcase->appendChild($failure);
-        } else {
+        } elseif (self::$show_info) {
             $skipped = $testcase->ownerDocument->createElement("skipped", $snippet);
             $testcase->appendChild($skipped);
         }

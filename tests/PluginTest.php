@@ -31,7 +31,7 @@ class PluginTest extends TestCase
     /**
      * Test custom load
      */
-    public function testAcceptsConfigOption(): void
+    public function testAcceptsFilePathConfigOption(): void
     {
         $registration = $this->prophesize(RegistrationInterface::class);
         $config = new SimpleXMLElement("<pluginClass><filepath>different_filename.xml</filepath></pluginClass>");
@@ -39,8 +39,35 @@ class PluginTest extends TestCase
         /** @var RegistrationInterface */
         $reg_interface = $registration->reveal();
         $plugin($reg_interface, $config);
-        $this->assertNotEmpty(JunitReport::$start_time);
         $filepath = getcwd() . DIRECTORY_SEPARATOR . (string) $config->filepath;
         $this->assertSame($filepath, JunitReport::$filepath);
+    }
+
+    /**
+     * Test custom load
+     */
+    public function testAcceptsShowInfoConfigOption(): void
+    {
+        $registration = $this->prophesize(RegistrationInterface::class);
+        $config = new SimpleXMLElement("<pluginClass><show_info>false</show_info></pluginClass>");
+        $plugin = new Plugin();
+        /** @var RegistrationInterface */
+        $reg_interface = $registration->reveal();
+        $plugin($reg_interface, $config);
+        $this->assertFalse(JunitReport::$show_info);
+    }
+
+    /**
+     * Test custom load
+     */
+    public function testAcceptsShowSnippetConfigOption(): void
+    {
+        $registration = $this->prophesize(RegistrationInterface::class);
+        $config = new SimpleXMLElement("<pluginClass><show_snippet>false</show_snippet></pluginClass>");
+        $plugin = new Plugin();
+        /** @var RegistrationInterface */
+        $reg_interface = $registration->reveal();
+        $plugin($reg_interface, $config);
+        $this->assertFalse(JunitReport::$show_snippet);
     }
 }

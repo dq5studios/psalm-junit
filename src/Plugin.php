@@ -16,18 +16,27 @@ class Plugin implements PluginEntryPointInterface
     public function __invoke(RegistrationInterface $psalm, ?SimpleXMLElement $config = null)
     {
         // Check if another report is to be run
-        $opts = getopt("", ["report"]);
+        $opts = getopt("", ["report", "report-show-info"]);
         if (isset($opts["report"]) && !isset($config->always)) {
             return;
+        }
+        if (isset($opts["report-show-info"])) {
+            JunitReport::$show_info = filter_var($opts["report-show-info"], FILTER_VALIDATE_BOOLEAN);
         }
 
         // Set plugin options
         JunitReport::$start_time = microtime(true);
 
-        // Set filepath via config
+        // Set flags via config
         if (!is_null($config)) {
             if (!empty($config->filepath)) {
                 JunitReport::$filepath = (string) $config->filepath;
+            }
+            if (!empty($config->show_info)) {
+                JunitReport::$show_info = filter_var($config->show_info, FILTER_VALIDATE_BOOLEAN);
+            }
+            if (!empty($config->show_snippet)) {
+                JunitReport::$show_snippet = filter_var($config->show_snippet, FILTER_VALIDATE_BOOLEAN);
             }
         }
 
