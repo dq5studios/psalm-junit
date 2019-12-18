@@ -56,7 +56,8 @@ to control if info level issues will be included in the output nor in the issue 
 </plugins>
 ```
 
-If `showSnippet` is defined in the config, snippets will not be included in the report.  The default is to include them.
+If `showSnippet` is defined in the config, the value is used to control if snippets will be included in the report.
+The default is to include them.
 
 ```xml
 <plugins>
