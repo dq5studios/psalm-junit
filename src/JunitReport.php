@@ -184,7 +184,7 @@ class JunitReport implements AfterAnalysisInterface
         $name = "{$issue["type"]} at {$file_path} ({$issue["line_from"]}:{$issue["column_from"]})";
         $testcase->setAttribute("name", $name);
         $testcase->setAttribute("classname", $classname);
-        $message = $issue["message"];
+        $message = htmlspecialchars($issue["message"], ENT_XML1 | ENT_QUOTES);
         $snippet = "{$issue["severity"]}: {$issue["type"]} - ";
         $snippet .= "{$file_path}:{$issue["line_from"]}:{$issue["column_from"]} - {$message}\n";
         if (self::$show_snippet) {
