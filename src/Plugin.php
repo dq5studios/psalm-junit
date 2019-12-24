@@ -18,10 +18,14 @@ class Plugin implements PluginEntryPointInterface
         // Check if another report is to be run
         $opts = getopt("", ["report", "report-show-info"]);
         if (isset($opts["report"]) && !isset($config->always)) {
+            // @codeCoverageIgnoreStart
             return;
+            // @codeCoverageIgnoreEnd
         }
         if (isset($opts["report-show-info"])) {
+            // @codeCoverageIgnoreStart
             JunitReport::$show_info = filter_var($opts["report-show-info"], FILTER_VALIDATE_BOOLEAN);
+            // @codeCoverageIgnoreEnd
         }
 
         // Set plugin options
