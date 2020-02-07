@@ -205,11 +205,11 @@ class JunitReportTest extends TestCase
         if (empty($values)) {
             $values = [[]];
         }
-        /** @var array<int, array{severity: string, line_from: int, line_to: int, type: string, message: string,
+        /** @var array<string, list<array{severity: string, line_from: int, line_to: int, type: string, message: string,
           * file_name: string, file_path: string, snippet: string, from: int, to: int,
-          * snippet_from: int, snippet_to: int, column_from: int, column_to: int, selected_text: string}>
+          * snippet_from: int, snippet_to: int, column_from: int, column_to: int, selected_text: string}>>
           */
-        $issue_list = array_merge(...$values);
+        $issue_list = [array_merge(...$values)];
 
         // Go
         JunitReport::afterAnalysis($codebase, $issue_list, [], null);

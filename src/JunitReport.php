@@ -68,6 +68,7 @@ class JunitReport implements AfterAnalysisInterface
         foreach ($issues as $issue_detail) {
             // This may be an array of issues for a specific file depending on version
             if (array_key_exists("file_name", $issue_detail)) {
+                /** @var IssueData[] */
                 $issue_detail = [$issue_detail];
             }
             foreach ($issue_detail as $detail) {
