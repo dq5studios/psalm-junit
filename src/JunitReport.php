@@ -66,11 +66,17 @@ class JunitReport implements AfterAnalysisInterface
         /** @var array<string,IssueData[]> */
         $processed_file_list = array_fill_keys($analyzer_list, []);
         foreach ($issues as $issue_detail) {
-            $key = $issue_detail["file_name"];
-            if (!array_key_exists($key, $processed_file_list)) {
-                $processed_file_list[$key] = [];
+            // This may be an array of issues for a specific file depending on version
+            if (array_key_exists("file_name", $issue_detail)) {
+                $issue_detail = [$issue_detail];
             }
-            array_push($processed_file_list[$key], $issue_detail);
+            foreach ($issue_detail as $detail) {
+                $key = $detail["file_name"];
+                if (!array_key_exists($key, $processed_file_list)) {
+                    $processed_file_list[$key] = [];
+                }
+                array_push($processed_file_list[$key], $detail);
+            }
         }
 
         $suite_name = "Psalm " . PSALM_VERSION;
