@@ -14,10 +14,11 @@ use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamFile;
 use Prophecy\Promise\ReturnPromise;
 use Psalm\Codebase;
+use Psalm\Internal\Analyzer\IssueData;
 use Psalm\Internal\Codebase\Analyzer;
 
 /**
- * @psalm-type  IssueData = array{
+ * @psalm-type  IssueDataArray = array{
  *     severity: string,
  *     line_from: int,
  *     line_to: int,
@@ -44,13 +45,13 @@ class JunitReportTest extends TestCase
      */
     public function generateTestCases(): Generator
     {
-        /** @var array<string,IssueData[]> */
+        /** @var array<string,array<int,IssueData|IssueDataArray>> */
         $issue_list = [];
         yield "Empty list" => [
             $issue_list, "Test Case #1", "0.0", ["tests" => 0, "failures" => 0, "children" => 0]
         ];
 
-        /** @var array<string,IssueData[]> */
+        /** @var array<string,array<int,IssueData|IssueDataArray>> */
         $issue_list = [
             "file1.php" => [],
             "file2.php" => [],
@@ -156,7 +157,7 @@ class JunitReportTest extends TestCase
      *
      * @dataProvider generateTestCases
      *
-     * @param array<string,IssueData[]> $issue_list
+     * @param array<string,array<int,IssueData|IssueDataArray>> $issue_list
      * @param string                    $suite_name
      * @param string                    $time_taken
      * @param array<string,int>         $expected
@@ -172,7 +173,7 @@ class JunitReportTest extends TestCase
      *
      * @dataProvider generateTestCases
      *
-     * @param array<string,IssueData[]> $issue_list
+     * @param array<string,array<int,IssueData|IssueDataArray>> $issue_list
      * @param string                    $suite_name
      * @param string                    $time_taken
      * @param array<string,int>         $expected
@@ -205,10 +206,7 @@ class JunitReportTest extends TestCase
         if (empty($values)) {
             $values = [[]];
         }
-        /** @var array<string, list<array{severity: string, line_from: int, line_to: int, type: string, message: string,
-          * file_name: string, file_path: string, snippet: string, from: int, to: int,
-          * snippet_from: int, snippet_to: int, column_from: int, column_to: int, selected_text: string}>>
-          */
+        /** @var array<string, list<IssueData>> */
         $issue_list = [array_merge(...$values)];
 
         // Go
@@ -225,7 +223,7 @@ class JunitReportTest extends TestCase
     /**
      * Asserts on processing the XML that both entry points need
      *
-     * @param array<string,IssueData[]> $issue_list
+     * @param array<string,array<int,IssueData|IssueDataArray>> $issue_list
      * @param array<string,int>         $expected
      */
     public function xmlFileAsserts(string $xml, array $expected): void
@@ -242,6 +240,7 @@ class JunitReportTest extends TestCase
         $testsuites = $dom->firstChild;
         assert($testsuites instanceof DOMNode);
         $attributes = $testsuites->attributes;
+        /** @psalm-suppress TypeDoesNotContainType */
         assert($attributes instanceof DOMNamedNodeMap);
         $attr = $attributes->getNamedItem("tests");
         assert($attr instanceof DOMNode);

@@ -7,13 +7,14 @@ namespace DQ5Studios\PsalmJunit;
 use DOMDocument;
 use DOMElement;
 use Psalm\Codebase;
+use Psalm\Internal\Analyzer\IssueData;
 use Psalm\Plugin\Hook\AfterAnalysisInterface;
 use Psalm\SourceControl\SourceControlInfo;
 
 use const PSALM_VERSION;
 
 /**
- * @psalm-type  IssueData = array{
+ * @psalm-type  IssueDataArray = array{
  *     severity: string,
  *     line_from: int,
  *     line_to: int,
@@ -63,16 +64,20 @@ class JunitReport implements AfterAnalysisInterface
         $analyzer_list = array_map(function (string $file_path) use ($cwd) {
             return str_replace($cwd . DIRECTORY_SEPARATOR, "", $file_path);
         }, $analyzer_list);
-        /** @var array<string,IssueData[]> */
+        /** @var array<string,array<int,IssueData|IssueDataArray>> */
         $processed_file_list = array_fill_keys($analyzer_list, []);
         foreach ($issues as $issue_detail) {
             // This may be an array of issues for a specific file depending on version
             if (array_key_exists("file_name", $issue_detail)) {
-                /** @var IssueData[] */
+                /** @var array<int,IssueData|IssueDataArray> */
                 $issue_detail = [$issue_detail];
             }
             foreach ($issue_detail as $detail) {
-                $key = $detail["file_name"];
+                if (is_array($detail)) {
+                    $key = $detail["file_name"];
+                } else {
+                    $key = $detail->file_name;
+                }
                 if (!array_key_exists($key, $processed_file_list)) {
                     $processed_file_list[$key] = [];
                 }
@@ -90,7 +95,7 @@ class JunitReport implements AfterAnalysisInterface
     /**
      * Create an XML string out of the data
      *
-     * @param array<string,IssueData[]> $issue_suite
+     * @param array<string,array<int,IssueData|IssueDataArray>> $issue_suite
      * @param string                    $suite_name
      * @param string                    $time_taken
      *
@@ -126,7 +131,7 @@ class JunitReport implements AfterAnalysisInterface
     /**
      * Create testsuite element
      *
-     * @param IssueData[] $issue_list All issues for this file
+     * @param array<int,IssueData|IssueDataArray> $issue_list All issues for this file
      * @param DOMDocument $dom        Source DOM
      * @param string      $file_path  File being processed
      *
@@ -153,7 +158,9 @@ class JunitReport implements AfterAnalysisInterface
 
         // Lots of errors in this file
         foreach ($issue_list as $issue) {
-            $testcase = self::makeTestcase($issue, $dom, $failure_count, $file_path);
+            /** @var IssueDataArray */
+            $issue_a = (array) $issue;
+            $testcase = self::makeTestcase($issue_a, $dom, $failure_count, $file_path);
             $testsuite->appendChild($testcase);
         }
 
@@ -173,7 +180,7 @@ class JunitReport implements AfterAnalysisInterface
     /**
      * Create testcase element
      *
-     * @param IssueData   $issue     Issue info
+     * @param IssueDataArray   $issue     Issue info
      * @param DOMDocument $dom       Source DOM
      * @param int         $failures  Number of failures
      * @param string      $file_path File being processed
