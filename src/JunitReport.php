@@ -13,25 +13,6 @@ use Psalm\SourceControl\SourceControlInfo;
 
 use const PSALM_VERSION;
 
-/**
- * @psalm-type  IssueDataArray = array{
- *     severity: string,
- *     line_from: int,
- *     line_to: int,
- *     type: string,
- *     message: string,
- *     file_name: string,
- *     file_path: string,
- *     snippet: string,
- *     from: int,
- *     to: int,
- *     snippet_from: int,
- *     snippet_to: int,
- *     column_from: int,
- *     column_to: int
- * }
- */
-
 class JunitReport implements AfterAnalysisInterface
 {
     /** @var string $file Output filepath */
@@ -64,20 +45,11 @@ class JunitReport implements AfterAnalysisInterface
         $analyzer_list = array_map(function (string $file_path) use ($cwd) {
             return str_replace($cwd . DIRECTORY_SEPARATOR, "", $file_path);
         }, $analyzer_list);
-        /** @var array<string,array<int,IssueData|IssueDataArray>> */
+        /** @var array<string,array<int,IssueData>> */
         $processed_file_list = array_fill_keys($analyzer_list, []);
         foreach ($issues as $issue_detail) {
-            // This may be an array of issues for a specific file depending on version
-            if (array_key_exists("file_name", $issue_detail)) {
-                /** @var array<int,IssueData|IssueDataArray> */
-                $issue_detail = [$issue_detail];
-            }
             foreach ($issue_detail as $detail) {
-                if (is_array($detail)) {
-                    $key = $detail["file_name"];
-                } else {
-                    $key = $detail->file_name;
-                }
+                $key = $detail->file_name;
                 if (!array_key_exists($key, $processed_file_list)) {
                     $processed_file_list[$key] = [];
                 }
@@ -95,9 +67,9 @@ class JunitReport implements AfterAnalysisInterface
     /**
      * Create an XML string out of the data
      *
-     * @param array<string,array<int,IssueData|IssueDataArray>> $issue_suite
-     * @param string                    $suite_name
-     * @param string                    $time_taken
+     * @param array<string,array<int,IssueData>> $issue_suite
+     * @param string                             $suite_name
+     * @param string                             $time_taken
      *
      * @return string
      */
@@ -131,9 +103,9 @@ class JunitReport implements AfterAnalysisInterface
     /**
      * Create testsuite element
      *
-     * @param array<int,IssueData|IssueDataArray> $issue_list All issues for this file
-     * @param DOMDocument $dom        Source DOM
-     * @param string      $file_path  File being processed
+     * @param array<int,IssueData> $issue_list All issues for this file
+     * @param DOMDocument          $dom        Source DOM
+     * @param string               $file_path  File being processed
      *
      * @return DOMElement Testsuite element
      */
@@ -158,9 +130,7 @@ class JunitReport implements AfterAnalysisInterface
 
         // Lots of errors in this file
         foreach ($issue_list as $issue) {
-            /** @var IssueDataArray */
-            $issue_a = (array) $issue;
-            $testcase = self::makeTestcase($issue_a, $dom, $failure_count, $file_path);
+            $testcase = self::makeTestcase($issue, $dom, $failure_count, $file_path);
             $testsuite->appendChild($testcase);
         }
 
@@ -180,7 +150,7 @@ class JunitReport implements AfterAnalysisInterface
     /**
      * Create testcase element
      *
-     * @param IssueDataArray   $issue     Issue info
+     * @param IssueData   $issue     Issue info
      * @param DOMDocument $dom       Source DOM
      * @param int         $failures  Number of failures
      * @param string      $file_path File being processed
@@ -188,32 +158,32 @@ class JunitReport implements AfterAnalysisInterface
      * @return DOMElement Testcase element
      */
     public static function makeTestcase(
-        array $issue,
+        IssueData $issue,
         DOMDocument $dom,
         int &$failures,
         string $file_path
     ): DOMElement {
         $classname = pathinfo(str_replace(DIRECTORY_SEPARATOR, ".", $file_path), PATHINFO_FILENAME);
         $testcase = $dom->createElement("testcase");
-        $name = "{$issue["type"]} at {$file_path} ({$issue["line_from"]}:{$issue["column_from"]})";
+        $name = "{$issue->type} at {$file_path} ({$issue->line_from}:{$issue->column_from})";
         $testcase->setAttribute("name", $name);
         $testcase->setAttribute("classname", $classname);
-        $message = htmlspecialchars($issue["message"], ENT_XML1 | ENT_QUOTES);
-        $snippet = "{$issue["severity"]}: {$issue["type"]} - ";
-        $snippet .= "{$file_path}:{$issue["line_from"]}:{$issue["column_from"]} - {$message}\n";
+        $message = htmlspecialchars($issue->message, ENT_XML1 | ENT_QUOTES);
+        $snippet = "{$issue->severity}: {$issue->type} - ";
+        $snippet .= "{$file_path}:{$issue->line_from}:{$issue->column_from} - {$message}\n";
         if (self::$show_snippet) {
-            $snippet_lines = explode("\n", $issue["snippet"]);
-            $from = (int) $issue["line_from"];
+            $snippet_lines = explode("\n", $issue->snippet) ?: [];
+            $from = (int) $issue->line_from;
             foreach ($snippet_lines as $line) {
                 $snippet .= (string) $from . ":" . htmlspecialchars($line, ENT_XML1 | ENT_QUOTES) . "\n";
                 $from++;
             }
         }
 
-        if ($issue["severity"] == "error") {
+        if ($issue->severity == "error") {
             $failures++;
             $failure = $testcase->ownerDocument->createElement("failure", $snippet);
-            $failure->setAttribute("type", $issue["severity"]);
+            $failure->setAttribute("type", $issue->severity);
             $failure->setAttribute("message", $message);
             $testcase->appendChild($failure);
         } elseif (self::$show_info) {

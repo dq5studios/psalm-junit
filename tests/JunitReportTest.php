@@ -17,25 +17,6 @@ use Psalm\Codebase;
 use Psalm\Internal\Analyzer\IssueData;
 use Psalm\Internal\Codebase\Analyzer;
 
-/**
- * @psalm-type  IssueDataArray = array{
- *     severity: string,
- *     line_from: int,
- *     line_to: int,
- *     type: string,
- *     message: string,
- *     file_name: string,
- *     file_path: string,
- *     snippet: string,
- *     from: int,
- *     to: int,
- *     snippet_from: int,
- *     snippet_to: int,
- *     column_from: int,
- *     column_to: int
- * }
- */
-
 class JunitReportTest extends TestCase
 {
     /**
@@ -45,13 +26,13 @@ class JunitReportTest extends TestCase
      */
     public function generateTestCases(): Generator
     {
-        /** @var array<string,array<int,IssueData|IssueDataArray>> */
+        /** @var array<string,array<int,IssueData>> */
         $issue_list = [];
         yield "Empty list" => [
             $issue_list, "Test Case #1", "0.0", ["tests" => 0, "failures" => 0, "children" => 0]
         ];
 
-        /** @var array<string,array<int,IssueData|IssueDataArray>> */
+        /** @var array<string,array<int,IssueData>> */
         $issue_list = [
             "file1.php" => [],
             "file2.php" => [],
@@ -63,88 +44,93 @@ class JunitReportTest extends TestCase
 
         $issue_list = [
             "file1.php" => [
-                [
-                    "severity" => "error",
-                    "line_from" => 10,
-                    "line_to" => 10,
-                    "type" => "UndefinedVariable",
-                    "message" => "Can not find &amp;variable",
-                    "file_name" => "file1.php",
-                    "file_path" => "file1.php",
-                    "snippet" => "\$i++&amp;",
-                    "from" => 0,
-                    "to" => 3,
-                    "snippet_from" => 10,
-                    "snippet_to" => 10,
-                    "column_from" => 0,
-                    "column_to" => 3
-                ],
-                [
-                    "severity" => "info",
-                    "line_from" => 10,
-                    "line_to" => 10,
-                    "type" => "UndefinedVariable",
-                    "message" => "Can not find variable",
-                    "file_name" => "file1.php",
-                    "file_path" => "file1.php",
-                    "snippet" => "\$i++",
-                    "from" => 0,
-                    "to" => 3,
-                    "snippet_from" => 10,
-                    "snippet_to" => 10,
-                    "column_from" => 0,
-                    "column_to" => 3
-                ],
+                new IssueData(
+                    "error",
+                    10,
+                    10,
+                    "UndefinedVariable",
+                    "Can not find &amp;variable",
+                    "file1.php",
+                    "file1.php",
+                    "\$i++&amp;",
+                    "",
+                    0,
+                    3,
+                    10,
+                    10,
+                    0,
+                    3
+                ),
+                new IssueData(
+                    "info",
+                    10,
+                    10,
+                    "UndefinedVariable",
+                    "Can not find variable",
+                    "file1.php",
+                    "file1.php",
+                    "\$i++",
+                    "",
+                    0,
+                    3,
+                    10,
+                    10,
+                    0,
+                    3
+                ),
             ],
             "file2.php" => [
-                [
-                    "severity" => "error",
-                    "line_from" => 10,
-                    "line_to" => 10,
-                    "type" => "UndefinedVariable",
-                    "message" => "Can not find variable ->",
-                    "file_name" => "file2.php",
-                    "file_path" => "file2.php",
-                    "snippet" => "\$i->i++",
-                    "from" => 0,
-                    "to" => 3,
-                    "snippet_from" => 10,
-                    "snippet_to" => 10,
-                    "column_from" => 0,
-                    "column_to" => 3
-                ],
-                [
-                    "severity" => "error",
-                    "line_from" => 10,
-                    "line_to" => 10,
-                    "type" => "UndefinedVariable",
-                    "message" => "Can not find \"variable\"",
-                    "file_name" => "file2.php",
-                    "file_path" => "file2.php",
-                    "snippet" => "\$i[\"i\"]++",
-                    "from" => 0,
-                    "to" => 3,
-                    "snippet_from" => 10,
-                    "snippet_to" => 10,
-                    "column_from" => 0,
-                    "column_to" => 3
-                ],
-                [
-                    "severity" => "error",
-                    "line_from" => 10,
-                    "line_to" => 10,
-                    "type" => "UndefinedVariable",
-                    "message" => "Can not find 'variable'",
-                    "file_name" => "file2.php",
-                    "file_path" => "file2.php",
-                    "snippet" => "\$i['i']++",
-                    "from" => 0,
-                    "to" => 3,
-                    "snippet_from" => 10,
-                    "snippet_to" => 10,
-                    "column_from" => 0,
-                    "column_to" => 3
-                ]
+                new IssueData(
+                    "error",
+                    10,
+                    10,
+                    "UndefinedVariable",
+                    "Can not find variable ->",
+                    "file2.php",
+                    "file2.php",
+                    "\$i->i++",
+                    "",
+                    0,
+                    3,
+                    10,
+                    10,
+                    0,
+                    3
+                ),
+                new IssueData(
+                    "error",
+                    10,
+                    10,
+                    "UndefinedVariable",
+                    "Can not find \"variable\"",
+                    "file2.php",
+                    "file2.php",
+                    "\$i[\"i\"]++",
+                    "",
+                    0,
+                    3,
+                    10,
+                    10,
+                    0,
+                    3
+                ),
+                new IssueData(
+                    "error",
+                    10,
+                    10,
+                    "UndefinedVariable",
+                    "Can not find 'variable'",
+                    "file2.php",
+                    "file2.php",
+                    "\$i['i']++",
+                    "",
+                    0,
+                    3,
+                    10,
+                    10,
+                    0,
+                    3
+                )
             ]
         ];
         yield "2 files 4 issues 1 supressed needs escaping" => [
@@ -157,7 +143,7 @@ class JunitReportTest extends TestCase
      *
      * @dataProvider generateTestCases
      *
-     * @param array<string,array<int,IssueData|IssueDataArray>> $issue_list
+     * @param array<string,array<int,IssueData>> $issue_list
      * @param string                    $suite_name
      * @param string                    $time_taken
      * @param array<string,int>         $expected
@@ -173,7 +159,7 @@ class JunitReportTest extends TestCase
      *
      * @dataProvider generateTestCases
      *
-     * @param array<string,array<int,IssueData|IssueDataArray>> $issue_list
+     * @param array<string,array<int,IssueData>> $issue_list
      * @param string                    $suite_name
      * @param string                    $time_taken
      * @param array<string,int>         $expected
@@ -223,7 +209,7 @@ class JunitReportTest extends TestCase
     /**
      * Asserts on processing the XML that both entry points need
      *
-     * @param array<string,array<int,IssueData|IssueDataArray>> $issue_list
+     * @param array<string,array<int,IssueData>> $issue_list
      * @param array<string,int>         $expected
      */
     public function xmlFileAsserts(string $xml, array $expected): void
