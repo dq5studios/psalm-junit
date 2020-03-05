@@ -26,13 +26,11 @@ class JunitReportTest extends TestCase
      */
     public function generateTestCases(): Generator
     {
-        /** @var array<string,array<int,IssueData>> */
         $issue_list = [];
         yield "Empty list" => [
             $issue_list, "Test Case #1", "0.0", ["tests" => 0, "failures" => 0, "children" => 0]
         ];
 
-        /** @var array<string,array<int,IssueData>> */
         $issue_list = [
             "file1.php" => [],
             "file2.php" => [],
@@ -144,9 +142,9 @@ class JunitReportTest extends TestCase
      * @dataProvider generateTestCases
      *
      * @param array<string,array<int,IssueData>> $issue_list
-     * @param string                    $suite_name
-     * @param string                    $time_taken
-     * @param array<string,int>         $expected
+     * @param string                             $suite_name
+     * @param string                             $time_taken
+     * @param array<string,int>                  $expected
      */
     public function testXmlGeneration(array $issue_list, string $suite_name, string $time_taken, array $expected): void
     {
@@ -160,9 +158,9 @@ class JunitReportTest extends TestCase
      * @dataProvider generateTestCases
      *
      * @param array<string,array<int,IssueData>> $issue_list
-     * @param string                    $suite_name
-     * @param string                    $time_taken
-     * @param array<string,int>         $expected
+     * @param string                             $suite_name
+     * @param string                             $time_taken
+     * @param array<string,int>                  $expected
      */
     public function testPsalmInput(array $issue_list, string $suite_name, string $time_taken, array $expected): void
     {
@@ -190,10 +188,9 @@ class JunitReportTest extends TestCase
         // Reformat input
         $values = array_values($issue_list);
         if (empty($values)) {
-            $values = [[]];
+            $values = [[]];  // PHP <= 7.4 fix
         }
-        /** @var array<string, list<IssueData>> */
-        $issue_list = [array_merge(...$values)];
+        $issue_list = ["key" => array_merge(...$values)];
 
         // Go
         JunitReport::afterAnalysis($codebase, $issue_list, [], null);
@@ -210,7 +207,7 @@ class JunitReportTest extends TestCase
      * Asserts on processing the XML that both entry points need
      *
      * @param array<string,array<int,IssueData>> $issue_list
-     * @param array<string,int>         $expected
+     * @param array<string,int>                  $expected
      */
     public function xmlFileAsserts(string $xml, array $expected): void
     {

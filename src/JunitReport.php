@@ -45,7 +45,6 @@ class JunitReport implements AfterAnalysisInterface
         $analyzer_list = array_map(function (string $file_path) use ($cwd) {
             return str_replace($cwd . DIRECTORY_SEPARATOR, "", $file_path);
         }, $analyzer_list);
-        /** @var array<string,array<int,IssueData>> */
         $processed_file_list = array_fill_keys($analyzer_list, []);
         foreach ($issues as $issue_detail) {
             foreach ($issue_detail as $detail) {
