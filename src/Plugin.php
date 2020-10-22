@@ -13,7 +13,7 @@ class Plugin implements PluginEntryPointInterface
     /**
      * {@inheritDoc}
      */
-    public function __invoke(RegistrationInterface $psalm, ?SimpleXMLElement $config = null)
+    public function __invoke(RegistrationInterface $registration, ?SimpleXMLElement $config = null)
     {
         // Check if another report is to be run
         $opts = getopt("", ["report", "report-show-info"]);
@@ -49,6 +49,6 @@ class Plugin implements PluginEntryPointInterface
             JunitReport::$filepath = getcwd() . DIRECTORY_SEPARATOR . JunitReport::$filepath;
         }
 
-        $psalm->registerHooksFromClass(JunitReport::class);
+        $registration->registerHooksFromClass(JunitReport::class);
     }
 }
