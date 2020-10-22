@@ -7,6 +7,7 @@ namespace DQ5Studios\PsalmJunit;
 use DOMDocument;
 use DOMElement;
 use Psalm\Codebase;
+use Psalm\Config;
 use Psalm\Internal\Analyzer\IssueData;
 use Psalm\Plugin\Hook\AfterAnalysisInterface;
 use Psalm\SourceControl\SourceControlInfo;
@@ -179,7 +180,7 @@ class JunitReport implements AfterAnalysisInterface
             }
         }
 
-        if ($issue->severity == "error") {
+        if ($issue->severity == Config::REPORT_ERROR) {
             $failures++;
             $failure = $testcase->ownerDocument->createElement("failure", $snippet);
             $failure->setAttribute("type", $issue->severity);
