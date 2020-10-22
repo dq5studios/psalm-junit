@@ -36,7 +36,7 @@ class JunitReport implements AfterAnalysisInterface
         array $issues,
         array $build_info,
         SourceControlInfo $source_control_info = null
-    ) {
+    ): void {
         // Reformat the data to group by file
         /** @psalm-suppress InternalMethod */
         $analyzer_list = $codebase->analyzer->getMixedCounts();
