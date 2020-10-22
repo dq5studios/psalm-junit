@@ -13,7 +13,7 @@ class Plugin implements PluginEntryPointInterface
     /**
      * {@inheritDoc}
      */
-    public function __invoke(RegistrationInterface $registration, ?SimpleXMLElement $config = null)
+    public function __invoke(RegistrationInterface $registration, ?SimpleXMLElement $config = null): void
     {
         // Check if another report is to be run
         $opts = getopt("", ["report", "report-show-info"]);
