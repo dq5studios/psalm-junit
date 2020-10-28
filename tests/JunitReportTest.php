@@ -12,6 +12,7 @@ use DOMNode;
 use Generator;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamFile;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Promise\ReturnPromise;
 use Psalm\Codebase;
 use Psalm\Internal\Analyzer\IssueData;
@@ -19,6 +20,8 @@ use Psalm\Internal\Codebase\Analyzer;
 
 class JunitReportTest extends TestCase
 {
+    use ProphecyTrait;
+
     /**
      * Generate issue lists for processing
      *
@@ -120,7 +123,7 @@ class JunitReportTest extends TestCase
                     "Can not find 'variable'",
                     "file2.php",
                     "file2.php",
-                    "\$i['i']++",
+                    "\$i['i']++ && \$i['i']++",
                     "",
                     0,
                     3,
@@ -187,8 +190,10 @@ class JunitReportTest extends TestCase
 
         // Reformat input
         $values = array_values($issue_list);
-        if (empty($values)) {
-            $values = [[]];  // PHP <= 7.4 fix
+        if (version_compare(PHP_VERSION, "7.4.0", "<")) {
+            if (empty($values)) {
+                $values = [[]];
+            }
         }
         $issue_list = ["key" => array_merge(...$values)];
 

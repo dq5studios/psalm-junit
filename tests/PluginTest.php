@@ -7,11 +7,14 @@ namespace DQ5Studios\PsalmJunit\Tests;
 use DQ5Studios\PsalmJunit\JunitReport;
 use DQ5Studios\PsalmJunit\Plugin;
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Psalm\Plugin\RegistrationInterface;
 use SimpleXMLElement;
 
 class PluginTest extends TestCase
 {
+    use ProphecyTrait;
+
     /**
      * Test default load
      */
