@@ -122,7 +122,7 @@ class JunitReport implements AfterAnalysisInterface
         // No errors in this file
         if (empty($issue_list)) {
             $file_test_count = 1;
-            $testcase = $testsuite->ownerDocument->createElement("testcase");
+            $testcase = $dom->createElement("testcase");
             $testcase->setAttribute("name", $file_path);
             $testcase->setAttribute("classname", $classname);
             $testsuite->appendChild($testcase);
@@ -182,12 +182,12 @@ class JunitReport implements AfterAnalysisInterface
 
         if ($issue->severity == Config::REPORT_ERROR) {
             $failures++;
-            $failure = $testcase->ownerDocument->createElement("failure", $snippet);
+            $failure = $dom->createElement("failure", $snippet);
             $failure->setAttribute("type", $issue->severity);
             $failure->setAttribute("message", $message);
             $testcase->appendChild($failure);
         } elseif (self::$show_info) {
-            $skipped = $testcase->ownerDocument->createElement("skipped", $snippet);
+            $skipped = $dom->createElement("skipped", $snippet);
             $testcase->appendChild($skipped);
         }
 
