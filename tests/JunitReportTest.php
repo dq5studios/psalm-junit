@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace DQ5Studios\PsalmJunit\Tests;
 
-use DG\BypassFinals;
 use DQ5Studios\PsalmJunit\JunitReport;
 use PHPUnit\Framework\TestCase;
 use DOMDocument;
@@ -19,8 +18,6 @@ use Psalm\Codebase;
 use Psalm\Internal\Analyzer\IssueData;
 use Psalm\Internal\Codebase\Analyzer;
 use Psalm\Plugin\EventHandler\Event\AfterAnalysisEvent;
-
-BypassFinals::enable();
 
 class JunitReportTest extends TestCase
 {

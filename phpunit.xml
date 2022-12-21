@@ -10,4 +10,7 @@
       <directory>tests</directory>
     </testsuite>
   </testsuites>
+  <extensions>
+    <extension class="DQ5Studios\PsalmJunit\Tests\ByPassFinalHook" />
+  </extensions>
 </phpunit>
