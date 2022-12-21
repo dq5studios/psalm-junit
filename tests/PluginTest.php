@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace DQ5Studios\PsalmJunit\Tests;
 
+use DG\BypassFinals;
 use DQ5Studios\PsalmJunit\JunitReport;
 use DQ5Studios\PsalmJunit\Plugin;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psalm\Plugin\RegistrationInterface;
 use SimpleXMLElement;
+
+BypassFinals::enable();
 
 class PluginTest extends TestCase
 {

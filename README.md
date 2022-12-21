@@ -7,7 +7,7 @@
 
 # psalm-junit
 
-A Junit report plugin for [Psalm](https://github.com/vimeo/psalm) (requires Psalm v3.9+).
+A Junit report plugin for [Psalm](https://github.com/vimeo/psalm) (requires Psalm v3.9+, works also with Psalm v5.4+).
 
 Installation:
 

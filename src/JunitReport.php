@@ -6,11 +6,10 @@ namespace DQ5Studios\PsalmJunit;
 
 use DOMDocument;
 use DOMElement;
-use Psalm\Codebase;
 use Psalm\Config;
 use Psalm\Internal\Analyzer\IssueData;
-use Psalm\Plugin\Hook\AfterAnalysisInterface;
-use Psalm\SourceControl\SourceControlInfo;
+use Psalm\Plugin\EventHandler\AfterAnalysisInterface;
+use Psalm\Plugin\EventHandler\Event\AfterAnalysisEvent;
 
 use const PSALM_VERSION;
 
@@ -32,22 +31,18 @@ class JunitReport implements AfterAnalysisInterface
     /**
      * {@inheritDoc}
      */
-    public static function afterAnalysis(
-        Codebase $codebase,
-        array $issues,
-        array $build_info,
-        SourceControlInfo $source_control_info = null
-    ): void {
+    public static function afterAnalysis(AfterAnalysisEvent $event): void
+    {
         // Reformat the data to group by file
         /** @psalm-suppress InternalMethod */
-        $analyzer_list = $codebase->analyzer->getMixedCounts();
+        $analyzer_list = $event->getCodebase()->analyzer->getMixedCounts();
         $analyzer_list = array_keys($analyzer_list);
         $cwd = getcwd();
         $analyzer_list = array_map(function (string $file_path) use ($cwd) {
             return str_replace($cwd . DIRECTORY_SEPARATOR, "", $file_path);
         }, $analyzer_list);
         $processed_file_list = array_fill_keys($analyzer_list, []);
-        foreach ($issues as $issue_detail) {
+        foreach ($event->getIssues() as $issue_detail) {
             foreach ($issue_detail as $detail) {
                 $key = $detail->file_name;
                 if (!array_key_exists($key, $processed_file_list)) {

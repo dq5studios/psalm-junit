@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DQ5Studios\PsalmJunit\Tests;
 
+use DG\BypassFinals;
 use DQ5Studios\PsalmJunit\JunitReport;
 use PHPUnit\Framework\TestCase;
 use DOMDocument;
@@ -17,6 +18,9 @@ use Prophecy\Promise\ReturnPromise;
 use Psalm\Codebase;
 use Psalm\Internal\Analyzer\IssueData;
 use Psalm\Internal\Codebase\Analyzer;
+use Psalm\Plugin\EventHandler\Event\AfterAnalysisEvent;
+
+BypassFinals::enable();
 
 class JunitReportTest extends TestCase
 {
@@ -198,7 +202,7 @@ class JunitReportTest extends TestCase
         $issue_list = ["key" => array_merge(...$values)];
 
         // Go
-        JunitReport::afterAnalysis($codebase, $issue_list, [], null);
+        JunitReport::afterAnalysis(new AfterAnalysisEvent($codebase, $issue_list, [], null));
 
         // Read the file output
         $this->assertTrue($vfs->hasChild($filename));
