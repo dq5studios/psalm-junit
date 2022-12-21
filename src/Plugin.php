@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace DQ5Studios\PsalmJunit;
 
-use SimpleXMLElement;
 use Psalm\Plugin\PluginEntryPointInterface;
 use Psalm\Plugin\RegistrationInterface;
+use SimpleXMLElement;
+
+use const DIRECTORY_SEPARATOR;
+use const FILTER_VALIDATE_BOOLEAN;
 
 class Plugin implements PluginEntryPointInterface
 {
@@ -32,7 +35,7 @@ class Plugin implements PluginEntryPointInterface
         JunitReport::$start_time = microtime(true);
 
         // Set flags via config
-        if (!is_null($config)) {
+        if (null !== $config) {
             if (!empty($config->filepath)) {
                 JunitReport::$filepath = (string) $config->filepath;
             }
@@ -45,7 +48,7 @@ class Plugin implements PluginEntryPointInterface
         }
 
         // Set in the cwd if not absolute
-        if (JunitReport::$filepath[0] !== DIRECTORY_SEPARATOR) {
+        if (DIRECTORY_SEPARATOR !== JunitReport::$filepath[0]) {
             JunitReport::$filepath = getcwd() . DIRECTORY_SEPARATOR . JunitReport::$filepath;
         }
 

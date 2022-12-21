@@ -11,21 +11,28 @@ use Psalm\Internal\Analyzer\IssueData;
 use Psalm\Plugin\EventHandler\AfterAnalysisInterface;
 use Psalm\Plugin\EventHandler\Event\AfterAnalysisEvent;
 
+use function array_key_exists;
+use function count;
+
+use const DIRECTORY_SEPARATOR;
+use const ENT_QUOTES;
+use const ENT_XML1;
+use const PATHINFO_FILENAME;
 use const PSALM_VERSION;
 
 class JunitReport implements AfterAnalysisInterface
 {
-    /** @var string $file Output filepath */
+    /** @var string Output filepath */
     public static $filepath = "psalm_junit_report.xml";
-    /** @var bool $show_info Include info level issues */
+    /** @var bool Include info level issues */
     public static $show_info = true;
-    /** @var bool $show_info Include snippets */
+    /** @var bool Include snippets */
     public static $show_snippet = true;
-    /** @var float $start_time Close enough of a start time */
+    /** @var float Close enough of a start time */
     public static $start_time = 0.0;
-    /** @var int $test_count Total count of tests */
+    /** @var int Total count of tests */
     public static $test_count = 0;
-    /** @var int $failure_count Total failed tests */
+    /** @var int Total failed tests */
     public static $failure_count = 0;
 
     /**
@@ -38,9 +45,10 @@ class JunitReport implements AfterAnalysisInterface
         $analyzer_list = $event->getCodebase()->analyzer->getMixedCounts();
         $analyzer_list = array_keys($analyzer_list);
         $cwd = getcwd();
-        $analyzer_list = array_map(function (string $file_path) use ($cwd) {
-            return str_replace($cwd . DIRECTORY_SEPARATOR, "", $file_path);
-        }, $analyzer_list);
+        $analyzer_list = array_map(
+            fn (string $file_path) => str_replace($cwd . DIRECTORY_SEPARATOR, "", $file_path),
+            $analyzer_list
+        );
         $processed_file_list = array_fill_keys($analyzer_list, []);
         foreach ($event->getIssues() as $issue_detail) {
             foreach ($issue_detail as $detail) {
@@ -48,7 +56,7 @@ class JunitReport implements AfterAnalysisInterface
                 if (!array_key_exists($key, $processed_file_list)) {
                     $processed_file_list[$key] = [];
                 }
-                array_push($processed_file_list[$key], $detail);
+                $processed_file_list[$key][] = $detail;
             }
         }
 
@@ -60,13 +68,13 @@ class JunitReport implements AfterAnalysisInterface
     }
 
     /**
-     * Create an XML string out of the data
+     * Create an XML string out of the data.
      *
-     * @param array<string,array<int,IssueData>> $issue_suite
-     * @param string                             $suite_name
-     * @param string                             $time_taken
+     * @param array<string,array<int,IssueData>> $issue_suite Suite of issues
+     * @param string                             $suite_name  Suite name
+     * @param string                             $time_taken  Time
      *
-     * @return string
+     * @return string XML file
      */
     public static function createXml(
         array $issue_suite,
@@ -96,7 +104,7 @@ class JunitReport implements AfterAnalysisInterface
     }
 
     /**
-     * Create testsuite element
+     * Create testsuite element.
      *
      * @param array<int,IssueData> $issue_list All issues for this file
      * @param DOMDocument          $dom        Source DOM
@@ -139,11 +147,12 @@ class JunitReport implements AfterAnalysisInterface
         $testsuite->setAttribute("errors", "0");
         self::$test_count += $file_test_count;
         self::$failure_count += $failure_count;
+
         return $testsuite;
     }
 
     /**
-     * Create testcase element
+     * Create testcase element.
      *
      * @param IssueData   $issue     Issue info
      * @param DOMDocument $dom       Source DOM
@@ -171,12 +180,12 @@ class JunitReport implements AfterAnalysisInterface
             $from = (int) $issue->line_from;
             foreach ($snippet_lines as $line) {
                 $snippet .= (string) $from . ":" . htmlspecialchars($line, ENT_XML1 | ENT_QUOTES) . "\n";
-                $from++;
+                ++$from;
             }
         }
 
-        if ($issue->severity == Config::REPORT_ERROR) {
-            $failures++;
+        if (Config::REPORT_ERROR == $issue->severity) {
+            ++$failures;
             $failure = $dom->createElement("failure", $snippet);
             $failure->setAttribute("type", $issue->severity);
             $failure->setAttribute("message", $message);

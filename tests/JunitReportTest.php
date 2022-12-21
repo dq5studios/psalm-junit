@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace DQ5Studios\PsalmJunit\Tests;
 
-use DQ5Studios\PsalmJunit\JunitReport;
-use PHPUnit\Framework\TestCase;
 use DOMDocument;
 use DOMNamedNodeMap;
 use DOMNode;
+use DQ5Studios\PsalmJunit\JunitReport;
 use Generator;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamFile;
+use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Promise\ReturnPromise;
 use Psalm\Codebase;
@@ -19,12 +19,19 @@ use Psalm\Internal\Analyzer\IssueData;
 use Psalm\Internal\Codebase\Analyzer;
 use Psalm\Plugin\EventHandler\Event\AfterAnalysisEvent;
 
+use function assert;
+use function define;
+use function defined;
+
+use const DIRECTORY_SEPARATOR;
+use const PHP_VERSION;
+
 class JunitReportTest extends TestCase
 {
     use ProphecyTrait;
 
     /**
-     * Generate issue lists for processing
+     * Generate issue lists for processing.
      *
      * @return Generator<string,array,mixed,void>
      */
@@ -32,16 +39,16 @@ class JunitReportTest extends TestCase
     {
         $issue_list = [];
         yield "Empty list" => [
-            $issue_list, "Test Case #1", "0.0", ["tests" => 0, "failures" => 0, "children" => 0]
+            $issue_list, "Test Case #1", "0.0", ["tests" => 0, "failures" => 0, "children" => 0],
         ];
 
         $issue_list = [
             "file1.php" => [],
             "file2.php" => [],
-            "file3.php" => []
+            "file3.php" => [],
         ];
         yield "3 files 0 issues" => [
-            $issue_list, "Test Case #2", "10.0", ["tests" => 3, "failures" => 0, "children" => 3]
+            $issue_list, "Test Case #2", "10.0", ["tests" => 3, "failures" => 0, "children" => 3],
         ];
 
         $issue_list = [
@@ -132,23 +139,23 @@ class JunitReportTest extends TestCase
                     10,
                     0,
                     3
-                )
-            ]
+                ),
+            ],
         ];
         yield "2 files 4 issues 1 supressed needs escaping" => [
-            $issue_list, "Test Case #3", "15.5", ["tests" => 5, "failures" => 4, "children" => 2]
+            $issue_list, "Test Case #3", "15.5", ["tests" => 5, "failures" => 4, "children" => 2],
         ];
     }
 
     /**
-     * Validate generated xml and check contents
+     * Validate generated xml and check contents.
      *
      * @dataProvider generateTestCases
      *
-     * @param array<string,array<int,IssueData>> $issue_list
-     * @param string                             $suite_name
-     * @param string                             $time_taken
-     * @param array<string,int>                  $expected
+     * @param array<string,array<int,IssueData>> $issue_list Issues
+     * @param string                             $suite_name Suit name
+     * @param string                             $time_taken Time
+     * @param array<string,int>                  $expected   Expectation
      */
     public function testXmlGeneration(array $issue_list, string $suite_name, string $time_taken, array $expected): void
     {
@@ -157,14 +164,14 @@ class JunitReportTest extends TestCase
     }
 
     /**
-     * Test generating report via psalm input
+     * Test generating report via psalm input.
      *
      * @dataProvider generateTestCases
      *
-     * @param array<string,array<int,IssueData>> $issue_list
-     * @param string                             $suite_name
-     * @param string                             $time_taken
-     * @param array<string,int>                  $expected
+     * @param array<string,array<int,IssueData>> $issue_list Issues
+     * @param string                             $suite_name Suite name
+     * @param string                             $time_taken Time
+     * @param array<string,int>                  $expected   Expectation
      */
     public function testPsalmInput(array $issue_list, string $suite_name, string $time_taken, array $expected): void
     {
@@ -210,7 +217,7 @@ class JunitReportTest extends TestCase
     }
 
     /**
-     * Asserts on processing the XML that both entry points need
+     * Asserts on processing the XML that both entry points need.
      *
      * @param array<string,array<int,IssueData>> $issue_list
      * @param array<string,int>                  $expected
@@ -229,7 +236,7 @@ class JunitReportTest extends TestCase
         $testsuites = $dom->firstChild;
         assert($testsuites instanceof DOMNode);
         $attributes = $testsuites->attributes;
-        /** @psalm-suppress TypeDoesNotContainType */
+        /* @psalm-suppress TypeDoesNotContainType */
         assert($attributes instanceof DOMNamedNodeMap);
         $attr = $attributes->getNamedItem("tests");
         assert($attr instanceof DOMNode);

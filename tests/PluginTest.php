@@ -11,12 +11,14 @@ use Prophecy\PhpUnit\ProphecyTrait;
 use Psalm\Plugin\RegistrationInterface;
 use SimpleXMLElement;
 
+use const DIRECTORY_SEPARATOR;
+
 class PluginTest extends TestCase
 {
     use ProphecyTrait;
 
     /**
-     * Test default load
+     * Test default load.
      */
     public function testHasEntryPoint(): void
     {
@@ -32,7 +34,7 @@ class PluginTest extends TestCase
     }
 
     /**
-     * Test custom load
+     * Test custom load.
      */
     public function testAcceptsFilePathConfigOption(): void
     {
@@ -47,7 +49,7 @@ class PluginTest extends TestCase
     }
 
     /**
-     * Test custom load
+     * Test custom load.
      */
     public function testAcceptsShowInfoConfigOption(): void
     {
@@ -61,7 +63,7 @@ class PluginTest extends TestCase
     }
 
     /**
-     * Test custom load
+     * Test custom load.
      */
     public function testAcceptsShowSnippetConfigOption(): void
     {
