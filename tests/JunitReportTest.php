@@ -219,13 +219,13 @@ class JunitReportTest extends TestCase
     /**
      * Asserts on processing the XML that both entry points need.
      *
-     * @param array<string,array<int,IssueData>> $issue_list
-     * @param array<string,int>                  $expected
+     * @param array<string,int> $expected
      */
     public function xmlFileAsserts(string $xml, array $expected): void
     {
         $dom = new DOMDocument("1.0", "UTF-8");
         $dom->preserveWhiteSpace = false;
+        $this->assertNotEmpty($xml);
         $dom->loadXML($xml);
 
         // Validate against xsd

@@ -176,8 +176,8 @@ class JunitReport implements AfterAnalysisInterface
         $snippet = "{$issue->severity}: {$issue->type} - ";
         $snippet .= "{$file_path}:{$issue->line_from}:{$issue->column_from} - {$message}\n";
         if (self::$show_snippet) {
-            $snippet_lines = explode("\n", $issue->snippet) ?: [];
-            $from = (int) $issue->line_from;
+            $snippet_lines = explode("\n", $issue->snippet);
+            $from = $issue->line_from;
             foreach ($snippet_lines as $line) {
                 $snippet .= (string) $from . ":" . htmlspecialchars($line, ENT_XML1 | ENT_QUOTES) . "\n";
                 ++$from;

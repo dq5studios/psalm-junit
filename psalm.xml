@@ -23,6 +23,10 @@
             </errorLevel>
         </PropertyNotSetInConstructor>
 
+        <InternalClass errorLevel="suppress" />
+        <InternalMethod errorLevel="suppress" />
+        <InternalProperty errorLevel="suppress" />
+
     </issueHandlers>
 
     <plugins>
