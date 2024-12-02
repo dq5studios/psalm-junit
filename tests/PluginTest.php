@@ -25,7 +25,6 @@ class PluginTest extends TestCase
         $registration = $this->prophesize(RegistrationInterface::class);
         $default_filename = JunitReport::$filepath;
         $plugin = new Plugin();
-        /** @var RegistrationInterface */
         $reg_interface = $registration->reveal();
         $plugin($reg_interface, null);
         $this->assertNotEmpty(JunitReport::$start_time);
@@ -41,7 +40,6 @@ class PluginTest extends TestCase
         $registration = $this->prophesize(RegistrationInterface::class);
         $config = new SimpleXMLElement("<pluginClass><filepath>different_filename.xml</filepath></pluginClass>");
         $plugin = new Plugin();
-        /** @var RegistrationInterface */
         $reg_interface = $registration->reveal();
         $plugin($reg_interface, $config);
         $filepath = getcwd() . DIRECTORY_SEPARATOR . (string) $config->filepath;
@@ -56,7 +54,6 @@ class PluginTest extends TestCase
         $registration = $this->prophesize(RegistrationInterface::class);
         $config = new SimpleXMLElement("<pluginClass><showInfo>false</showInfo></pluginClass>");
         $plugin = new Plugin();
-        /** @var RegistrationInterface */
         $reg_interface = $registration->reveal();
         $plugin($reg_interface, $config);
         $this->assertFalse(JunitReport::$show_info);
@@ -70,7 +67,6 @@ class PluginTest extends TestCase
         $registration = $this->prophesize(RegistrationInterface::class);
         $config = new SimpleXMLElement("<pluginClass><showSnippet>false</showSnippet></pluginClass>");
         $plugin = new Plugin();
-        /** @var RegistrationInterface */
         $reg_interface = $registration->reveal();
         $plugin($reg_interface, $config);
         $this->assertFalse(JunitReport::$show_snippet);

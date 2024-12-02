@@ -188,11 +188,9 @@ class JunitReportTest extends TestCase
 
         // Mock up the typed parameter
         $prophecy = $this->prophesize(Codebase::class);
-        /** @var Codebase */
         $codebase = $prophecy->reveal();
         $other_prophecy = $this->prophesize(Analyzer::class);
         $other_prophecy->getMixedCounts()->will(new ReturnPromise([$issue_list]));
-        /** @var Analyzer */
         $analyzer = $other_prophecy->reveal();
         $codebase->analyzer = $analyzer;
 
