@@ -13,6 +13,7 @@ use Psalm\Plugin\EventHandler\Event\AfterAnalysisEvent;
 
 use function array_key_exists;
 use function count;
+use function Safe\getcwd;
 
 use const DIRECTORY_SEPARATOR;
 use const ENT_QUOTES;

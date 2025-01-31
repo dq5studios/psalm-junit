@@ -22,6 +22,7 @@ use Psalm\Plugin\EventHandler\Event\AfterAnalysisEvent;
 use function assert;
 use function define;
 use function defined;
+use function Safe\getcwd;
 
 use const DIRECTORY_SEPARATOR;
 use const PHP_VERSION;

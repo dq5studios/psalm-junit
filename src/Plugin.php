@@ -8,6 +8,8 @@ use Psalm\Plugin\PluginEntryPointInterface;
 use Psalm\Plugin\RegistrationInterface;
 use SimpleXMLElement;
 
+use function Safe\getcwd;
+
 use const DIRECTORY_SEPARATOR;
 use const FILTER_VALIDATE_BOOLEAN;
 
