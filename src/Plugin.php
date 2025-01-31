@@ -15,9 +15,6 @@ use const FILTER_VALIDATE_BOOLEAN;
 
 class Plugin implements PluginEntryPointInterface
 {
-    /**
-     * {@inheritDoc}
-     */
     public function __invoke(RegistrationInterface $registration, ?SimpleXMLElement $config = null): void
     {
         // Check if another report is to be run
