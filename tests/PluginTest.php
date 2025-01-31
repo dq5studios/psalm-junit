@@ -11,6 +11,8 @@ use Prophecy\PhpUnit\ProphecyTrait;
 use Psalm\Plugin\RegistrationInterface;
 use SimpleXMLElement;
 
+use function Safe\getcwd;
+
 use const DIRECTORY_SEPARATOR;
 
 class PluginTest extends TestCase

@@ -13,6 +13,7 @@ use Psalm\Plugin\EventHandler\Event\AfterAnalysisEvent;
 
 use function array_key_exists;
 use function count;
+use function Safe\getcwd;
 
 use const DIRECTORY_SEPARATOR;
 use const ENT_QUOTES;
@@ -23,21 +24,18 @@ use const PSALM_VERSION;
 class JunitReport implements AfterAnalysisInterface
 {
     /** @var string Output filepath */
-    public static $filepath = "psalm_junit_report.xml";
+    public static string $filepath = "psalm_junit_report.xml";
     /** @var bool Include info level issues */
-    public static $show_info = true;
+    public static bool $show_info = true;
     /** @var bool Include snippets */
-    public static $show_snippet = true;
+    public static bool $show_snippet = true;
     /** @var float Close enough of a start time */
-    public static $start_time = 0.0;
+    public static float $start_time = 0.0;
     /** @var int Total count of tests */
-    public static $test_count = 0;
+    public static int $test_count = 0;
     /** @var int Total failed tests */
-    public static $failure_count = 0;
+    public static int $failure_count = 0;
 
-    /**
-     * {@inheritDoc}
-     */
     public static function afterAnalysis(AfterAnalysisEvent $event): void
     {
         // Reformat the data to group by file
@@ -79,7 +77,7 @@ class JunitReport implements AfterAnalysisInterface
     public static function createXml(
         array $issue_suite,
         string $suite_name,
-        string $time_taken
+        string $time_taken,
     ): string {
         // Initialize counters
         self::$test_count = 0;
@@ -165,7 +163,7 @@ class JunitReport implements AfterAnalysisInterface
         IssueData $issue,
         DOMDocument $dom,
         int &$failures,
-        string $file_path
+        string $file_path,
     ): DOMElement {
         $classname = pathinfo(str_replace(DIRECTORY_SEPARATOR, ".", $file_path), PATHINFO_FILENAME);
         $testcase = $dom->createElement("testcase");
