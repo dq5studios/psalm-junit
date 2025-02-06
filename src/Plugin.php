@@ -8,8 +8,6 @@ use Psalm\Plugin\PluginEntryPointInterface;
 use Psalm\Plugin\RegistrationInterface;
 use SimpleXMLElement;
 
-use function Safe\getcwd;
-
 use const DIRECTORY_SEPARATOR;
 use const FILTER_VALIDATE_BOOLEAN;
 
@@ -48,7 +46,7 @@ class Plugin implements PluginEntryPointInterface
 
         // Set in the cwd if not absolute
         if (DIRECTORY_SEPARATOR !== JunitReport::$filepath[0]) {
-            JunitReport::$filepath = getcwd() . DIRECTORY_SEPARATOR . JunitReport::$filepath;
+            JunitReport::$filepath = (getcwd() ?: ".") . DIRECTORY_SEPARATOR . JunitReport::$filepath;
         }
 
         $registration->registerHooksFromClass(JunitReport::class);

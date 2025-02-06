@@ -11,8 +11,6 @@ use Prophecy\PhpUnit\ProphecyTrait;
 use Psalm\Plugin\RegistrationInterface;
 use SimpleXMLElement;
 
-use function Safe\getcwd;
-
 use const DIRECTORY_SEPARATOR;
 
 class PluginTest extends TestCase
@@ -30,7 +28,7 @@ class PluginTest extends TestCase
         $reg_interface = $registration->reveal();
         $plugin($reg_interface, null);
         $this->assertNotEmpty(JunitReport::$start_time);
-        $filepath = getcwd() . DIRECTORY_SEPARATOR . $default_filename;
+        $filepath = (getcwd() ?: ".") . DIRECTORY_SEPARATOR . $default_filename;
         $this->assertSame($filepath, JunitReport::$filepath);
     }
 
@@ -44,7 +42,7 @@ class PluginTest extends TestCase
         $plugin = new Plugin();
         $reg_interface = $registration->reveal();
         $plugin($reg_interface, $config);
-        $filepath = getcwd() . DIRECTORY_SEPARATOR . (string) $config->filepath;
+        $filepath = (getcwd() ?: ".") . DIRECTORY_SEPARATOR . (string) $config->filepath;
         $this->assertSame($filepath, JunitReport::$filepath);
     }
 
