@@ -13,7 +13,6 @@ use Psalm\Plugin\EventHandler\Event\AfterAnalysisEvent;
 
 use function array_key_exists;
 use function count;
-use function Safe\getcwd;
 
 use const DIRECTORY_SEPARATOR;
 use const ENT_QUOTES;
@@ -42,7 +41,7 @@ class JunitReport implements AfterAnalysisInterface
         /** @psalm-suppress InternalMethod */
         $analyzer_list = $event->getCodebase()->analyzer->getMixedCounts();
         $analyzer_list = array_keys($analyzer_list);
-        $cwd = getcwd();
+        $cwd = getcwd() ?: ".";
         $analyzer_list = array_map(
             fn (string $file_path) => str_replace($cwd . DIRECTORY_SEPARATOR, "", $file_path),
             $analyzer_list

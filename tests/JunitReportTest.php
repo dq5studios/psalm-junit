@@ -22,7 +22,6 @@ use Psalm\Plugin\EventHandler\Event\AfterAnalysisEvent;
 use function assert;
 use function define;
 use function defined;
-use function Safe\getcwd;
 
 use const DIRECTORY_SEPARATOR;
 use const PHP_VERSION;
@@ -178,7 +177,7 @@ class JunitReportTest extends TestCase
     {
         // Setup vfs
         $filename = uniqid("junit", true) . "xml";
-        $vfs = vfsStream::setup(getcwd());
+        $vfs = vfsStream::setup(getcwd() ?: ".");
         JunitReport::$filepath = $vfs->url() . DIRECTORY_SEPARATOR . $filename;
 
         // Setup some variables
@@ -228,7 +227,8 @@ class JunitReportTest extends TestCase
         $dom->loadXML($xml);
 
         // Validate against xsd
-        $valid = $dom->schemaValidate(getcwd() . DIRECTORY_SEPARATOR . "tests" . DIRECTORY_SEPARATOR . "junit.xsd");
+        $cwd = getcwd() ?: ".";
+        $valid = $dom->schemaValidate($cwd . DIRECTORY_SEPARATOR . "tests" . DIRECTORY_SEPARATOR . "junit.xsd");
         $this->assertTrue($valid, "Output did not validate against XSD");
 
         // Check against expected values
