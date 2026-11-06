@@ -33,7 +33,7 @@ class JunitReportTest extends TestCase
     /**
      * Generate issue lists for processing.
      *
-     * @return Generator<string,array,mixed,void>
+     * @return Generator<string,array{0:array<string,array<int,IssueData>>,1:string,2:string,3:array<string,int>},mixed,void>
      */
     public function generateTestCases(): Generator
     {
@@ -190,6 +190,7 @@ class JunitReportTest extends TestCase
         $prophecy = $this->prophesize(Codebase::class);
         $codebase = $prophecy->reveal();
         $other_prophecy = $this->prophesize(Analyzer::class);
+        /** @psalm-suppress UndefinedMagicMethod,MixedMethodCall Prophecy not figuring out things correctly */
         $other_prophecy->getMixedCounts()->will(new ReturnPromise([$issue_list]));
         $analyzer = $other_prophecy->reveal();
         $codebase->analyzer = $analyzer;

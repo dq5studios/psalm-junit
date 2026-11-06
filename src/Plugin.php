@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DQ5Studios\PsalmJunit;
 
+use Override;
 use Psalm\Plugin\PluginEntryPointInterface;
 use Psalm\Plugin\RegistrationInterface;
 use SimpleXMLElement;
@@ -13,6 +14,7 @@ use const FILTER_VALIDATE_BOOLEAN;
 
 class Plugin implements PluginEntryPointInterface
 {
+    #[Override]
     public function __invoke(RegistrationInterface $registration, ?SimpleXMLElement $config = null): void
     {
         // Check if another report is to be run

@@ -11,10 +11,14 @@
     ],
     "require": {
         "php": ">=8.1",
-        "vimeo/psalm": "^4.4 || ^5.0 || ^6.0 || ^7.0"
+        "vimeo/psalm": "^4.4 || ^5.0 || ^6.0 || ^7.0",
+        "symfony/polyfill-php82": "^1.43",
+        "symfony/polyfill-php83": "^1.43",
+        "symfony/polyfill-php84": "^1.43",
+        "symfony/polyfill-php85": "^1.43"
     },
     "require-dev": {
-        "squizlabs/php_codesniffer": "^3.5",
+        "squizlabs/php_codesniffer": "^4.0",
         "phpunit/phpunit": "^9.0",
         "mikey179/vfsstream": "^1.6",
         "phpspec/prophecy-phpunit": "^2.0",

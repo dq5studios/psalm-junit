@@ -6,6 +6,7 @@ namespace DQ5Studios\PsalmJunit;
 
 use DOMDocument;
 use DOMElement;
+use Override;
 use Psalm\Config;
 use Psalm\Internal\Analyzer\IssueData;
 use Psalm\Plugin\EventHandler\AfterAnalysisInterface;
@@ -35,6 +36,7 @@ class JunitReport implements AfterAnalysisInterface
     /** @var int Total failed tests */
     public static int $failure_count = 0;
 
+    #[Override]
     public static function afterAnalysis(AfterAnalysisEvent $event): void
     {
         // Reformat the data to group by file
@@ -43,7 +45,7 @@ class JunitReport implements AfterAnalysisInterface
         $analyzer_list = array_keys($analyzer_list);
         $cwd = getcwd() ?: ".";
         $analyzer_list = array_map(
-            fn (string $file_path) => str_replace($cwd . DIRECTORY_SEPARATOR, "", $file_path),
+            static fn (string $file_path) => str_replace($cwd . DIRECTORY_SEPARATOR, "", $file_path),
             $analyzer_list
         );
         $processed_file_list = array_fill_keys($analyzer_list, []);

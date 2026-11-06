@@ -27,6 +27,7 @@
         <InternalClass errorLevel="suppress" />
         <InternalMethod errorLevel="suppress" />
         <InternalProperty errorLevel="suppress" />
+        <ClassMustBeFinal errorLevel="suppress" />
 
     </issueHandlers>
 
